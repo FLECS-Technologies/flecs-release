@@ -33,9 +33,9 @@ jobs:
     validate_inputs:
       runs-on: ubuntu-latest
       env:
-        V3_PATTERN: '^v3\.\d+\.\d+-hedgehog$'
-        V4_PATTERN: '^v4\.\d+\.\d+-snowhare$'
-        CONSOLE_PATTERN: '^v3\.\d+\.\d+'
+        V3_PATTERN: '^v3\.[0-9]+\.[0-9]+-hedgehog$'
+        V4_PATTERN: '^v4\.[0-9]+\.[0-9]+-snowhare$'
+        CONSOLE_PATTERN: '^v3\.[0-9]+\.[0-9]+'
       steps:
         - name: check core version with Regex
           run: |
