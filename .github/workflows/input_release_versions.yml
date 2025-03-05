@@ -1,0 +1,57 @@
+name: Inputs for new release versions
+on:
+  workflow_dispatch:
+    inputs:
+      core_version:
+        description: New core version
+        required: false
+        type: string
+      webapp_version:
+        description: New webapp version
+        required: false
+        type: string
+      console_version:
+        description: New console version
+        required: false
+        type: string
+      core_branch:
+        description: Branch for new core version
+        required: false
+        type: string
+        default: main
+      webapp_branch:
+        description: Branch for new webapp version
+        required: false
+        type: string
+        default: main
+      console_branch:
+        description: Branch for new console version
+        required: false
+        type: string
+        default: main
+jobs:
+    validate_inputs:
+      runs-on: ubuntu-latest
+      env:
+        V3_PATTERN: '^v3\.\d+\.\d+-hedgehog$'
+        V4_PATTERN: '^v4\.\d+\.\d+-snowhare$'
+        CONSOLE_PATTERN: '^v3\.\d+\.\d+'
+      steps:
+        - name: check core version with Regex
+          run: |
+            if [[ -n "${{ inputs.core_version }}" && ! ("${{ inputs.core_version }}" =~ $V3_PATTERN || "${{ inputs.core_version }}" =~ $V4_PATTERN) ]]; then
+              echo "Error: Core version does not match a valid pattern" >&2
+              exit 1
+            fi
+        - name: check webapp version with Regex
+          run: |
+            if [[ -n "${{ inputs.webapp_version }}" && ! ("${{ inputs.webapp_version }}" =~ $V3_PATTERN || "${{ inputs.webapp_version }}" =~ $V4_PATTERN) ]]; then
+              echo "Error: Webapp version does not match a valid pattern" >&2
+              exit 1
+            fi
+        - name: check console version with Regex
+          run: |
+            if [[ -n "${{ inputs.console_version }}" && ! ("${{ inputs.console_version }}" =~ $CONSOLE_PATTERN) ]]; then
+              echo "Error: Console version does not match a valid pattern" >&2
+              exit 1
+            fi
