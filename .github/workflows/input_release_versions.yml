@@ -29,13 +29,19 @@ on:
         required: false
         type: string
         default: main
+env:
+  INPUT_CORE_VERSION: ${{ inputs.core_version }}
+  INPUT_CORE_BRANCH: ${{ inputs.core_branch }}
+  INPUT_WEBAPP_VERSION: ${{ inputs.webapp_version }}
+  INPUT_WEBAPP_BRANCH: ${{ inputs.webapp_branch }}
+  INPUT_CONSOLE_VERSION: ${{ inputs.console_version }}
+  INPUT_CONSOLE_BRANCH: ${{ inputs.console_branch }}
+  V3_PATTERN: '^v3\.[0-9]+\.[0-9]+-hedgehog$'
+  V4_PATTERN: '^v4\.[0-9]+\.[0-9]+-snowhare$'
+  CONSOLE_PATTERN: '^v3\.[0-9]+\.[0-9]+'
 jobs:
     validate_inputs:
       runs-on: ubuntu-latest
-      env:
-        V3_PATTERN: '^v3\.[0-9]+\.[0-9]+-hedgehog$'
-        V4_PATTERN: '^v4\.[0-9]+\.[0-9]+-snowhare$'
-        CONSOLE_PATTERN: '^v3\.[0-9]+\.[0-9]+'
       steps:
         - name: check core version with Regex
           run: |
@@ -55,3 +61,15 @@ jobs:
               echo "Error: Console version does not match a valid pattern" >&2
               exit 1
             fi
+    release_webapp:
+      uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml
+      secrets: inherit
+      with:
+        env_webapp_version: ${{ env.INPUT_WEBAPP_VERSION }}
+        env_webapp_branch: ${{ env.INPUT_WEBAPP_BRANCH }}
+    release_core:
+      uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml
+      secrets: inherit
+      with:
+        env_core_version: ${{ env.INPUT_CORE_VERSION }}
+        env_core_branch: ${{ env.INPUT_CORE_BRANCH }}
