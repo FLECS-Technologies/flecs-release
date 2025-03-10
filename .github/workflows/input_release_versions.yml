@@ -62,7 +62,7 @@ jobs:
               exit 1
             fi
     release_webapp:
-      uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml
+      uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
       secrets: inherit
       with:
         env_webapp_version: ${{ env.INPUT_WEBAPP_VERSION }}
