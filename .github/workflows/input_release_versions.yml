@@ -67,9 +67,3 @@ jobs:
       with:
         env_webapp_version: ${{ env.INPUT_WEBAPP_VERSION }}
         env_webapp_branch: ${{ env.INPUT_WEBAPP_BRANCH }}
-    release_core:
-      uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml
-      secrets: inherit
-      with:
-        env_core_version: ${{ env.INPUT_CORE_VERSION }}
-        env_core_branch: ${{ env.INPUT_CORE_BRANCH }}
