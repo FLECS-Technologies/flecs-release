@@ -65,5 +65,5 @@ jobs:
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
       secrets: inherit
       with:
-        env_webapp_version: ${{ env.INPUT_WEBAPP_VERSION }}
-        env_webapp_branch: ${{ env.INPUT_WEBAPP_BRANCH }}
+        env_webapp_version: ${{ inputs.webapp_version }}
+        env_webapp_branch: ${{ inputs.webapp_branch }}
