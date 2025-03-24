@@ -63,6 +63,8 @@ jobs:
             fi
     generate_token:
       runs-on: ubuntu-latest
+      outputs:
+        app_token: ${{ steps.app-token.outputs.token }}
       steps:
         - name: Generate GitHub App Token
           id: app-token
@@ -75,8 +77,9 @@ jobs:
               flecs-webapp-dummy
     release_webapp:
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
-      needs: [validate_inputs]
+      needs: [validate_inputs, generate_token]
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
-        token: ${{ steps.app-token.outputs.token }}
+      secrets:
+        token: ${{ needs.generate_token.outputs.app_token }}
