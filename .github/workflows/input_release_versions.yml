@@ -63,6 +63,8 @@ jobs:
             fi
     release_webapp:
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
+      needs: [validate_inputs]
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
+        app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_APP_ID }}
