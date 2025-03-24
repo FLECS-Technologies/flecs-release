@@ -61,12 +61,22 @@ jobs:
               echo "Error: Console version does not match a valid pattern" >&2
               exit 1
             fi
+    generate_token:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Generate GitHub App Token
+          id: app-token
+          uses: actions/create-github-app-token@v1
+          with:
+            app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+            private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+            owner: FLECS-Technologies
+            repositories: |
+              flecs-webapp-dummy
     release_webapp:
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
       needs: [validate_inputs]
-      secrets:
-        APP_ID: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        PRIVATE_KEY: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
+        token: ${{ steps.app-token.outputs.token }}
