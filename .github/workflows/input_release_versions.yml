@@ -81,5 +81,4 @@ jobs:
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
-      secrets:
         token: ${{ needs.generate_token.outputs.app_token }}
