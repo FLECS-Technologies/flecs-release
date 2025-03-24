@@ -81,3 +81,6 @@ jobs:
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
+      secrets:
+        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
