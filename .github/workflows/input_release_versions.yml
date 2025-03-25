@@ -83,12 +83,25 @@ jobs:
             owner: FLECS-Technologies
             repositories: |
               flecs-webapp-dummy
+              flecs-build-dummy
+              flecs-public-dummy
     release_webapp:
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
       needs: [validate_inputs, generate_token]
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
+        should_fail: ${{ inputs.test_should_fail }}
+        should_timeout: ${{ inputs.test_should_timeout }}
+      secrets:
+        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    release_build:
+      uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml@main
+      needs: [validate_inputs, generate_token]
+      with:
+        env_build_version: ${{ inputs.webapp_version }}
+        env_build_branch: ${{ inputs.webapp_branch }}
         should_fail: ${{ inputs.test_should_fail }}
         should_timeout: ${{ inputs.test_should_timeout }}
       secrets:
