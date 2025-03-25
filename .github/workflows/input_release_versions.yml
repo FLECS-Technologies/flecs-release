@@ -29,6 +29,14 @@ on:
         required: false
         type: string
         default: main
+      test_should_fail:
+        description: simulate failure of workflow
+        required: false
+        type: string
+      test_should_timeout:
+        description: simulation timeout of workflow
+        required: false
+        type: string
 env:
   INPUT_CORE_VERSION: ${{ inputs.core_version }}
   INPUT_CORE_BRANCH: ${{ inputs.core_branch }}
@@ -81,6 +89,8 @@ jobs:
       with:
         env_webapp_version: ${{ inputs.webapp_version }}
         env_webapp_branch: ${{ inputs.webapp_branch }}
+        should_fail: ${{ inputs.test_should_fail }}
+        should_timeout: ${{ inputs.test_should_timeout }}
       secrets:
         app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
         private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
