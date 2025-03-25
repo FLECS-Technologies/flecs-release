@@ -86,6 +86,7 @@ jobs:
               flecs-build-dummy
               flecs-public-dummy
     release_webapp:
+      if: inputs.webapp_version != ''
       uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
       needs: [validate_inputs, generate_token]
       with:
@@ -97,6 +98,7 @@ jobs:
         app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
         private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
     release_build:
+      if: inputs.core_version != ''
       uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml@main
       needs: [validate_inputs, generate_token]
       with:
