@@ -100,8 +100,8 @@ jobs:
       uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml@main
       needs: [validate_inputs, generate_token]
       with:
-        env_build_version: ${{ inputs.webapp_version }}
-        env_build_branch: ${{ inputs.webapp_branch }}
+        env_build_version: ${{ inputs.core_version }}
+        env_build_branch: ${{ inputs.core_branch }}
         should_fail: ${{ inputs.test_should_fail }}
         should_timeout: ${{ inputs.test_should_timeout }}
       secrets:
