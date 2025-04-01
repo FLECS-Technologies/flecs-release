@@ -109,3 +109,26 @@ jobs:
       secrets:
         app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
         private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    check_build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: get all workflows
+          id: get_workflows
+          uses: octokit/request-action@v2.x
+          with:
+            route: GET /repos/FLECS-Technologies/flecs-webapp-dummy/actions/workflows
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Extract Workflow ID by name
+          run: |
+            WORKFLOW_NAME="Create webapp release"
+            WORKFLOW_ID=$(echo "${{ steps.get_workflows.outputs.data }}" | jq -r \
+              --arg WORKFLOW_NAME "$WORKFLOW_NAME" ".workflows[0] | select(.name == $WORKFLOW_NAME) | .id")
+
+            if [[ -z "$WORKFLOW_ID" ]]; then
+              echo "No workflow found with title "$WORKFLOW_NAME""
+              exit 1
+            fi
+
+            echo "Found Workflow-ID: $WORKFLOW_ID"
+            echo "WORKFLOW_ID=$WORKFLOW_ID" >> $GITHUB_ENV
