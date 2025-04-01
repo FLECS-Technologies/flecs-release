@@ -123,7 +123,7 @@ jobs:
           run: |
             WORKFLOW_NAME="Create webapp release"
             WORKFLOW_ID=$(echo "${{ steps.get_workflows.outputs.data }}" | jq -r \
-              --arg WORKFLOW_NAME "$WORKFLOW_NAME" ".workflows[0] | select(.name == $WORKFLOW_NAME) | .id")
+              --arg WORKFLOW_NAME "$WORKFLOW_NAME" '.workflows[0] | select(.name == $WORKFLOW_NAME) | .id')
 
             if [[ -z "$WORKFLOW_ID" ]]; then
               echo "No workflow found with title "$WORKFLOW_NAME""
