@@ -70,6 +70,7 @@ jobs:
               exit 1
             fi
     generate_token:
+      if: false
       runs-on: ubuntu-latest
       outputs:
         app_token: ${{ steps.app-token.outputs.token }}
@@ -121,12 +122,13 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         - name: Extract Workflow ID by name
           run: |
+            echo "${{ steps.get_workflows.outputs.data }}"
             WORKFLOW_NAME="Create webapp release"
             WORKFLOW_ID=$(echo "${{ steps.get_workflows.outputs.data }}" | jq -r \
-              --arg WORKFLOW_NAME "$WORKFLOW_NAME" '.workflows[0] | select(.name == $WORKFLOW_NAME) | .id')
+              --arg WORKFLOW_NAME "$WORKFLOW_NAME" '.workflows[] | select(.name == $WORKFLOW_NAME) | .id')
 
             if [[ -z "$WORKFLOW_ID" ]]; then
-              echo "No workflow found with title "$WORKFLOW_NAME""
+              echo "No workflow found with title \"$WORKFLOW_NAME\""
               exit 1
             fi
 
