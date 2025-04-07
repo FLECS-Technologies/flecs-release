@@ -120,17 +120,39 @@ jobs:
             route: GET /repos/FLECS-Technologies/flecs-webapp-dummy/actions/workflows
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - name: Extract Workflow ID by name
+        - name: Extract workflow ID
           run: |
-            echo "${{ steps.get_workflows.outputs.data }}"
             WORKFLOW_NAME="Create webapp release"
-            WORKFLOW_ID=$(echo "${{ steps.get_workflows.outputs.data }}" | jq -r \
-              --arg WORKFLOW_NAME "$WORKFLOW_NAME" '.workflows[] | select(.name == $WORKFLOW_NAME) | .id')
-
-            if [[ -z "$WORKFLOW_ID" ]]; then
-              echo "No workflow found with title \"$WORKFLOW_NAME\""
+            RAW_DATA='${{ steps.get_workflows.outputs.data }}'
+            echo "$RAW_DATA" > tmp.js
+            node -e "
+              const data = $RAW_DATA;
+              const match = data.workflows.find(w => w.name === '$WORKFLOW_NAME');
+              if (!match) {
+                console.error('No matching workflow');
+                process.exit(1);
+              }
+              console.log('WORKFLOW_ID=' + match.id);
+            " >> $GITHUB_ENV
+        - name: Get completed runs
+          id: get_runs
+          uses: octokit/request-action@v2.x
+          with:
+            route: GET /repos/FLECS-Technologies/flecs-webapp-dummy/actions/workflows/${{ env.WORKFLOW_ID }}/runs?status=completed
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Check run conclusion
+          run: |
+            runs=$(echo '${{ steps.get_runs.outputs.data }}' | jq '.workflow_runs')
+            if [[ $(echo "$runs" | jq 'length') -eq 0 ]]; then
+              echo "No completed runs found."
               exit 1
             fi
-
-            echo "Found Workflow-ID: $WORKFLOW_ID"
-            echo "WORKFLOW_ID=$WORKFLOW_ID" >> $GITHUB_ENV
+            conclusion=$(echo "$runs" | jq -r '.[0].conclusion')
+            echo "Conclusion of the last run: $conclusion"
+            if [[ "$conclusion" != "success" ]]; then
+              echo "Last run did not succeed."
+              exit 1
+            fi
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
