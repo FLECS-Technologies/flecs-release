@@ -117,12 +117,12 @@ jobs:
           id: get_workflows
           uses: octokit/request-action@v2.x
           with:
-            route: GET /repos/FLECS-Technologies/flecs-webapp-dummy/actions/workflows
+            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/workflows?per_page=100
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         - name: Extract workflow ID
           run: |
-            WORKFLOW_NAME="Create webapp release"
+            WORKFLOW_NAME="Release"
             RAW_DATA='${{ steps.get_workflows.outputs.data }}'
             echo "$RAW_DATA" > tmp.js
             node -e "
@@ -138,21 +138,34 @@ jobs:
           id: get_runs
           uses: octokit/request-action@v2.x
           with:
-            route: GET /repos/FLECS-Technologies/flecs-webapp-dummy/actions/workflows/${{ env.WORKFLOW_ID }}/runs?status=completed
+            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/workflows/${{ env.WORKFLOW_ID }}/runs?status=completed
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - name: Check run conclusion
+        - name: Get workflow run ID by display_title
+          id: get_filtered_run
           run: |
-            runs=$(echo '${{ steps.get_runs.outputs.data }}' | jq '.workflow_runs')
-            if [[ $(echo "$runs" | jq 'length') -eq 0 ]]; then
-              echo "No completed runs found."
+            DISPLAY_TITLE="v3.6.0-hedgehog"
+            echo '${{ steps.get_runs.outputs.data }}' > raw.json
+            run_id=$(jq -r --arg title "$DISPLAY_TITLE" '
+              .workflow_runs
+              | map(select(.display_title == $title))
+              | .[0].id
+            ' raw.json)
+            if [[ -z "$run_id" || "$run_id" == "null" ]]; then
+              echo "No Run found for '$DISPLAY_TITLE'."
               exit 1
             fi
-            conclusion=$(echo "$runs" | jq -r '.[0].conclusion')
-            echo "Conclusion of the last run: $conclusion"
-            if [[ "$conclusion" != "success" ]]; then
-              echo "Last run did not succeed."
-              exit 1
-            fi
+            echo "Found Run-ID: $run_id"
+            echo "run_id=$run_id" >> $GITHUB_OUTPUT
+        - name: Get jobs of workflow run
+          id: get_jobs
+          uses: octokit/request-action@v2.x
+          with:
+            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/runs/${{ steps.get_filtered_run.outputs.run_id }}/jobs
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: Show jobs of run
+          run: |
+            echo '${{ steps.get_jobs.outputs.data }}' > jobs.json
+            echo "Status of build job:"
+            jq -r '.jobs[] | select(.name == "build") | "- \(.name): \(.status) (\(.conclusion))"' jobs.json
