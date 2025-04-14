@@ -1,4 +1,4 @@
-name: Inputs for new release versions
+name: Release new version
 on:
   workflow_dispatch:
     inputs:
