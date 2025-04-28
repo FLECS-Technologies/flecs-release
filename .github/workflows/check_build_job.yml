@@ -1,0 +1,41 @@
+name: Check status of build job
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: Name of repository
+        required: true
+        type: string
+jobs:
+  wait_for_run_completion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/polling
+        with:
+          name: ${{ inputs.name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+  check_build:
+    needs: wait_for_run_completion
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/get-completed-runs
+        id: get_runs
+        with:
+          name: ${{ inputs.name }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/get-run-id
+        id: get_run_id
+        with:
+          data: ${{ steps.get_runs.outputs.data }}
+
+      - uses: ./.github/actions/get-jobs-of-run
+        id: get_jobs
+        with:
+          name: ${{ inputs.name }}
+          run_id: ${{ steps.get_run_id.outputs.run_id }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/build-job-status
+        with:
+          data: ${{ steps.get_jobs.outputs.data }}
