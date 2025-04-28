@@ -1,0 +1,46 @@
+name: Polling for completed workflow run
+description: Polls for a completed and successful workflow run
+inputs:
+  name:
+    description: Name of repository
+    required: true
+  github_token:
+    description: GitHub Token
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: |
+        MAX_RETRIES=30
+        INTERVAL=30
+        COUNTER=0
+        FOUND=false
+
+        while [[ $COUNTER -lt $MAX_RETRIES ]]; do
+          echo "Attempt $((COUNTER+1)) of $MAX_RETRIES"
+
+          response=$(curl -s -H "Authorization: token ${{ inputs.github_token }}" \
+            https://api.github.com/repos/FLECS-Technologies/flecs-${{ inputs.name }}/actions/workflows/release.workflow.yml/runs?status=completed)
+
+          run_status=$(echo "$response" | jq -r '.workflow_runs[0].status')
+          run_conclusion=$(echo "$response" | jq -r '.workflow_runs[0].conclusion')
+
+          echo "Status of newest run: $run_status"
+          echo "Conclusion: $run_conclusion"
+
+          if [[ "$run_status" == "completed" && "$run_conclusion" == "success" ]]; then
+            echo "Newest run completed and successful"
+            FOUND=true
+            break
+          fi
+
+          COUNTER=$((COUNTER+1))
+          echo "No Run completed yet. Wait for $INTERVAL seconds"
+          sleep $INTERVAL
+        done
+
+        if [[ "$FOUND" == "false" ]]; then
+          echo "Timeout: No completed run found."
+          exit 1
+        fi
+      shell: bash

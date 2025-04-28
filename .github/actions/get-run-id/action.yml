@@ -1,0 +1,31 @@
+name: Extract Workflow Run ID
+description: Extracts the workflow run ID from a response
+inputs:
+  data:
+    description: The JSON response data
+    required: true
+runs:
+  using: composite
+  steps:
+    - run: |
+        cat <<EOF > raw.json
+        ${{ inputs.data }}
+        EOF
+
+        if jq -e '.workflow_runs' raw.json > /dev/null; then
+          run_id=$(jq -r '.workflow_runs[0].id' raw.json)
+        elif jq -e '.jobs' raw.json > /dev/null; then
+          run_id=$(jq -r '.jobs[0].run_id' raw.json)
+        else
+          echo "Neither workflow_runs nor jobs found."
+          exit 1
+        fi
+
+        if [[ -z "$run_id" || "$run_id" == "null" ]]; then
+          echo "No run id found."
+          exit 1
+        fi
+
+        echo "Found Run-ID: $run_id"
+        echo "run_id=$run_id" >> $GITHUB_OUTPUT
+      shell: bash

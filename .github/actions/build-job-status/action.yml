@@ -1,0 +1,15 @@
+name: Print build job status
+description: Show status of Build-Jobs
+inputs:
+  jobs_data:
+    description: Data of the build job
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Print job status
+      shell: bash
+      run: |
+        echo '${{ inputs.jobs_data }}' > jobs.json
+          echo "Status of build job:"
+          jq -r '.jobs[] | select(.name | type == "string" and test("(?i)build")) | "- \(.name): \(.status) (\(.conclusion))"' jobs.json
