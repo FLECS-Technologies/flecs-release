@@ -50,11 +50,14 @@ jobs:
         with:
           data: ${{ steps.get_runs.outputs.data }}
 
+      - name: Set run_id
+        run: echo "RUN_ID=${{ steps.get_run_id.outputs.run_id }}" >> $GITHUB_ENV
+
       - name: Get jobs of workflow run
         id: get_jobs
         uses: octokit/request-action@v2.x
         with:
-          route: ${{ format('GET /repos/FLECS-Technologies/flecs-{0}/actions/runs/{1}/jobs', inputs.name, steps.get_run_id.outputs.run_id) }}
+          route: GET /repos/FLECS-Technologies/flecs-${{ inputs.name }}/actions/runs/${{ env.RUN_ID }}/jobs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
