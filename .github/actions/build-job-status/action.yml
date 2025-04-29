@@ -11,5 +11,5 @@ runs:
       shell: bash
       run: |
         echo '${{ inputs.jobs_data }}' > jobs.json
-          echo "Status of build job:"
-          jq -r '.jobs[] | select(.name | type == "string" and test("(?i)build")) | "- \(.name): \(.status) (\(.conclusion))"' jobs.json
+        echo "Status of build job:"
+        jq -r '.jobs[] | select(.name | type == "string" and test("(?i)build")) | "- \(.name): \(.status) (\(.conclusion))"' jobs.json
