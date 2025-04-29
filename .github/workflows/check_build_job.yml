@@ -54,7 +54,7 @@ jobs:
         id: get_jobs
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/FLECS-Technologies/flecs-${{ inputs.name }}/actions/runs/${{ steps.get_run_id.outputs.run_id }}/jobs
+          route: ${{ format('GET /repos/FLECS-Technologies/flecs-{0}/actions/runs/{1}/jobs', inputs.name, steps.get_run_id.outputs.run_id) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
