@@ -1,6 +1,6 @@
 name: Check status of build job
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       name:
         description: Name of repository
@@ -10,32 +10,55 @@ jobs:
   wait_for_run_completion:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/polling
+      - name: Clone repository
+        uses: actions/checkout@v4
+      - name: Polling for completed workflow run
+        uses: ./.github/actions/polling
         with:
           name: ${{ inputs.name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  delete_release_on_failure:
+    needs: wait_for_run_completion
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/delete-release-on-fail
+        with:
+          name: ${{ inputs.name }}
+          tag: ${{ inputs.tag }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   check_build:
     needs: wait_for_run_completion
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/get-completed-runs
-        id: get_runs
-        with:
-          name: ${{ inputs.name }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Clone repository
+        uses: actions/checkout@v4
 
-      - uses: ./.github/actions/get-run-id
+      - name: Get completed runs
+        id: get_runs
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/FLECS-Technologies/flecs-${{ inputs.name }}/actions/workflows/release.workflow.yml/runs?status=completed&per_page=1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get run ID
+        uses: ./.github/actions/get-run-id
         id: get_run_id
         with:
           data: ${{ steps.get_runs.outputs.data }}
 
-      - uses: ./.github/actions/get-jobs-of-run
+      - name: Get jobs of workflow run
         id: get_jobs
+        uses: octokit/request-action@v2.x
         with:
-          name: ${{ inputs.name }}
-          run_id: ${{ steps.get_run_id.outputs.run_id }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          route: GET /repos/FLECS-Technologies/flecs-${{ inputs.name }}/actions/runs/${{ steps.get_run_id.outputs.run_id }}/jobs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: ./.github/actions/build-job-status
+      - name: Status of build job
+        uses: ./.github/actions/build-job-status
         with:
-          data: ${{ steps.get_jobs.outputs.data }}
+          jobs_data: ${{ steps.get_jobs.outputs.data }}
