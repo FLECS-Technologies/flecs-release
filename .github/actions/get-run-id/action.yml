@@ -4,10 +4,15 @@ inputs:
   data:
     description: The JSON response data
     required: true
+outputs:
+  run_id:
+    description: The id of the workflow run
+    value: ${{ steps.get_run_id.outputs.run_id }}
 runs:
   using: composite
   steps:
-    - run: |
+    - id: get_run_id
+      run: |
         cat <<EOF > raw.json
         ${{ inputs.data }}
         EOF
