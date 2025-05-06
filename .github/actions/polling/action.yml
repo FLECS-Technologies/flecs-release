@@ -11,7 +11,7 @@ runs:
   using: composite
   steps:
     - run: |
-        MAX_RETRIES=30
+        MAX_RETRIES=40
         INTERVAL=30
         COUNTER=0
         FOUND=false
