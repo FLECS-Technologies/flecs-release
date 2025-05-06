@@ -112,10 +112,10 @@ jobs:
   release_public:
     if: inputs.core_version != ''
     needs: [validate_inputs, generate_token, release_build, check_build_build]
-    uses: FLECS-Technologies/flecs-public-dummy/.github/workflows/release_build.yml@main
+    uses: FLECS-Technologies/flecs-public-dummy/.github/workflows/release_public.yml@main
     with:
-      env_build_version: ${{ inputs.core_version }}
-      env_build_branch: ${{ inputs.core_branch }}
+      env_public_version: ${{ inputs.core_version }}
+      env_public_branch: ${{ inputs.core_branch }}
       should_fail: ${{ inputs.test_should_fail }}
       should_timeout: ${{ inputs.test_should_timeout }}
     secrets:
