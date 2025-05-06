@@ -37,135 +37,94 @@ on:
         description: simulation timeout of workflow
         required: false
         type: string
-env:
-  INPUT_CORE_VERSION: ${{ inputs.core_version }}
-  INPUT_CORE_BRANCH: ${{ inputs.core_branch }}
-  INPUT_WEBAPP_VERSION: ${{ inputs.webapp_version }}
-  INPUT_WEBAPP_BRANCH: ${{ inputs.webapp_branch }}
-  INPUT_CONSOLE_VERSION: ${{ inputs.console_version }}
-  INPUT_CONSOLE_BRANCH: ${{ inputs.console_branch }}
-  V3_PATTERN: '^v3\.[0-9]+\.[0-9]+-hedgehog$'
-  V4_PATTERN: '^v4\.[0-9]+\.[0-9]+-snowhare$'
-  CONSOLE_PATTERN: '^v3\.[0-9]+\.[0-9]+'
 jobs:
-    validate_inputs:
-      runs-on: ubuntu-latest
-      steps:
-        - name: check core version with Regex
-          run: |
-            if [[ -n "${{ inputs.core_version }}" && ! ("${{ inputs.core_version }}" =~ $V3_PATTERN || "${{ inputs.core_version }}" =~ $V4_PATTERN) ]]; then
-              echo "Error: Core version does not match a valid pattern" >&2
-              exit 1
-            fi
-        - name: check webapp version with Regex
-          run: |
-            if [[ -n "${{ inputs.webapp_version }}" && ! ("${{ inputs.webapp_version }}" =~ $V3_PATTERN || "${{ inputs.webapp_version }}" =~ $V4_PATTERN) ]]; then
-              echo "Error: Webapp version does not match a valid pattern" >&2
-              exit 1
-            fi
-        - name: check console version with Regex
-          run: |
-            if [[ -n "${{ inputs.console_version }}" && ! ("${{ inputs.console_version }}" =~ $CONSOLE_PATTERN) ]]; then
-              echo "Error: Console version does not match a valid pattern" >&2
-              exit 1
-            fi
-    generate_token:
-      if: false
-      runs-on: ubuntu-latest
-      outputs:
-        app_token: ${{ steps.app-token.outputs.token }}
-      steps:
-        - name: Generate GitHub App Token
-          id: app-token
-          uses: actions/create-github-app-token@v1
-          with:
-            app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-            private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
-            owner: FLECS-Technologies
-            repositories: |
-              flecs-webapp-dummy
-              flecs-build-dummy
-              flecs-public-dummy
-    release_webapp:
-      if: inputs.webapp_version != ''
-      uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
-      needs: [validate_inputs, generate_token]
-      with:
-        env_webapp_version: ${{ inputs.webapp_version }}
-        env_webapp_branch: ${{ inputs.webapp_branch }}
-        should_fail: ${{ inputs.test_should_fail }}
-        should_timeout: ${{ inputs.test_should_timeout }}
-      secrets:
-        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
-    release_build:
-      if: inputs.core_version != ''
-      uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml@main
-      needs: [validate_inputs, generate_token]
-      with:
-        env_build_version: ${{ inputs.core_version }}
-        env_build_branch: ${{ inputs.core_branch }}
-        should_fail: ${{ inputs.test_should_fail }}
-        should_timeout: ${{ inputs.test_should_timeout }}
-      secrets:
-        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
-    check_build:
-      runs-on: ubuntu-latest
-      steps:
-        - name: get all workflows
-          id: get_workflows
-          uses: octokit/request-action@v2.x
-          with:
-            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/workflows?per_page=100
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - name: Extract workflow ID
-          run: |
-            WORKFLOW_NAME="Release"
-            RAW_DATA='${{ steps.get_workflows.outputs.data }}'
-            echo "$RAW_DATA" > tmp.js
-            node -e "
-              const data = $RAW_DATA;
-              const match = data.workflows.find(w => w.name === '$WORKFLOW_NAME');
-              if (!match) {
-                console.error('No matching workflow');
-                process.exit(1);
-              }
-              console.log('WORKFLOW_ID=' + match.id);
-            " >> $GITHUB_ENV
-        - name: Get completed runs
-          id: get_runs
-          uses: octokit/request-action@v2.x
-          with:
-            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/workflows/${{ env.WORKFLOW_ID }}/runs?status=completed
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - name: Get workflow run ID by display_title
-          id: get_filtered_run
-          run: |
-            DISPLAY_TITLE="v3.6.0-hedgehog"
-            echo '${{ steps.get_runs.outputs.data }}' > raw.json
-            run_id=$(jq -r --arg title "$DISPLAY_TITLE" '
-              .workflow_runs
-              | map(select(.display_title == $title))
-              | .[0].id
-            ' raw.json)
-            if [[ -z "$run_id" || "$run_id" == "null" ]]; then
-              echo "No Run found for '$DISPLAY_TITLE'."
-              exit 1
-            fi
-            echo "Found Run-ID: $run_id"
-            echo "run_id=$run_id" >> $GITHUB_OUTPUT
-        - name: Get jobs of workflow run
-          id: get_jobs
-          uses: octokit/request-action@v2.x
-          with:
-            route: GET /repos/FLECS-Technologies/flecs-webapp/actions/runs/${{ steps.get_filtered_run.outputs.run_id }}/jobs
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - name: Show jobs of run
-          run: |
-            echo '${{ steps.get_jobs.outputs.data }}' > jobs.json
-            echo "Status of build job:"
-            jq -r '.jobs[] | select(.name == "build") | "- \(.name): \(.status) (\(.conclusion))"' jobs.json
+  validate_inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Validate Inputs
+        uses: ./.github/actions/validate-versions
+        with:
+          core_version: ${{ inputs.core_version }}
+          webapp_version: ${{ inputs.webapp_version }}
+          console_version: ${{ inputs.console_version }}
+
+  generate_token:
+    if: false
+    runs-on: ubuntu-latest
+    outputs:
+      app_token: ${{ steps.app-token.outputs.token }}
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+          owner: FLECS-Technologies
+          repositories: |
+            flecs-webapp-dummy
+            flecs-build-dummy
+            flecs-public-dummy
+
+  release_webapp:
+    if: inputs.webapp_version != ''
+    needs: [validate_inputs, generate_token]
+    uses: FLECS-Technologies/flecs-webapp-dummy/.github/workflows/release_webapp.yml@main
+    with:
+      env_webapp_version: ${{ inputs.webapp_version }}
+      env_webapp_branch: ${{ inputs.webapp_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+
+  check_build_webapp:
+    if: inputs.build_version != ''
+    needs: release_webapp
+    uses: ./.github/workflows/check_build_job.yml
+    with:
+      name: webapp-dummy
+
+  release_build:
+    if: inputs.core_version != ''
+    needs: [validate_inputs, generate_token]
+    uses: FLECS-Technologies/flecs-build-dummy/.github/workflows/release_build.yml@main
+    with:
+      env_build_version: ${{ inputs.core_version }}
+      env_build_branch: ${{ inputs.core_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+
+  check_build_build:
+    if: inputs.core_version != ''
+    needs: release_build
+    uses: ./.github/workflows/check_build_job.yml
+    with:
+      name: build-dummy
+
+  release_public:
+    if: inputs.core_version != ''
+    needs: [validate_inputs, generate_token, release_build, check_build_build]
+    uses: FLECS-Technologies/flecs-public-dummy/.github/workflows/release_build.yml@main
+    with:
+      env_build_version: ${{ inputs.core_version }}
+      env_build_branch: ${{ inputs.core_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+
+  check_build_public:
+    if: inputs.core_version != ''
+    needs: [check_build_build, release_public]
+    uses: ./.github/workflows/check_build_job.yml
+    with:
+      name: public-dummy
