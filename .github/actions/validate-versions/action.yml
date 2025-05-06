@@ -1,0 +1,56 @@
+name: Validate Versions
+description: Validate version inputs against regex patterns
+inputs:
+  core_version:
+    description: New core version
+    required: false
+  webapp_version:
+    description: New webapp version
+    required: false
+  console_version:
+    description: New console version
+    required: false
+runs:
+  using: composite
+  steps:
+    - run: |
+        V3_PATTERN='^v3\.[0-9]+\.[0-9]+-hedgehog$'
+        V4_PATTERN='^v4\.[0-9]+\.[0-9]+-snowhare$'
+        CONSOLE_PATTERN='^v3\.[0-9]+\.[0-9]+'
+
+        if [[ -n "${{ inputs.webapp_version }}" ]]; then
+          echo "Checking webapp version: '${{ inputs.webapp_version }}'"
+          if [[ ! "${{ inputs.webapp_version }}" =~ $V3_PATTERN && ! "${{ inputs.webapp_version }}" =~ $V4_PATTERN ]]; then
+            echo "Webapp version '${{ inputs.webapp_version }}' does not match a valid pattern" >&2
+            exit 1
+          else
+            echo "Webapp version is valid"
+          fi
+        else
+          echo "Skipping webapp, version not provided"
+        fi
+
+        if [[ -n "${{ inputs.core_version }}" ]]; then
+          echo "Checking core version: '${{ inputs.core_version }}'"
+          if [[ ! "${{ inputs.core_version }}" =~ $V3_PATTERN && ! "${{ inputs.core_version }}" =~ $V4_PATTERN ]]; then
+            echo "Core version '${{ inputs.core_version }}' does not match a valid pattern" >&2
+            exit 1
+          else
+            echo "Core version is valid"
+          fi
+        else
+          echo "Skipping core, version not provided"
+        fi
+
+        if [[ -n "${{ inputs.console_version }}" ]]; then
+          echo "Checking console version: '${{ inputs.console_version }}'"
+          if [[ ! "${{ inputs.console_version }}" =~ $CONSOLE_PATTERN ]]; then
+            echo "Console version '${{ inputs.console_version }}' does not match a valid pattern" >&2
+            exit 1
+          else
+            echo "Console version is valid"
+          fi
+        else
+          echo "Skipping console, version not provided"
+        fi
+      shell: bash
