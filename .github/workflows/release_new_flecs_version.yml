@@ -82,7 +82,7 @@ jobs:
       private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
 
   check_build_webapp:
-    if: inputs.build_version != ''
+    if: inputs.webapp_version != ''
     needs: release_webapp
     uses: ./.github/workflows/check_build_job.yml
     with:
