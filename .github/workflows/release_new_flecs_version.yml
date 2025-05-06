@@ -52,7 +52,6 @@ jobs:
           console_version: ${{ inputs.console_version }}
 
   generate_token:
-    if: false
     runs-on: ubuntu-latest
     outputs:
       app_token: ${{ steps.app-token.outputs.token }}
