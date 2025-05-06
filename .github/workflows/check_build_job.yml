@@ -1,6 +1,6 @@
 name: Check status of build job
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       name:
         description: Name of repository
