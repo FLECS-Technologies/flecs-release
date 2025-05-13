@@ -23,6 +23,11 @@ on:
         description: simulation timeout of workflow
         required: false
         type: boolean
+    secrets:
+      app_id:
+        required: true
+      private_key:
+        required: true
 
 jobs:
   release:
