@@ -69,11 +69,14 @@ jobs:
             flecs-public-dummy
 
   release_webapp:
+    if: inputs.webapp_version != ''
     runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token]
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
     - name: Create release
-      if: inputs.webapp_version != ''
       uses: ./.github/actions/create_release
       with:
         name: webapp-dummy
@@ -92,11 +95,14 @@ jobs:
       name: webapp-dummy
 
   release_build:
+    if: inputs.webapp_version != ''
     runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token]
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
     - name: Create release
-      if: inputs.webapp_version != ''
       uses: ./.github/actions/create_release
       with:
         name: build-dummy
@@ -115,11 +121,14 @@ jobs:
       name: build-dummy
 
   release_public:
+    if: inputs.build_version != ''
     runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token, release_build, check_build_build]
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
     - name: Create release
-      if: inputs.build_version != ''
       uses: ./.github/actions/create_release
       with:
         name: public-dummy
