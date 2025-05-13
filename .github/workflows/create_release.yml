@@ -1,4 +1,4 @@
-name: Create new release
+name: Create release for app
 on:
   workflow_call:
     inputs:
@@ -6,11 +6,11 @@ on:
         required: true
         description: name of the repository
         type: string
-      env_webapp_version:
+      env_version:
         required: true
         description: new webapp version
         type: string
-      env_webapp_branch:
+      env_branch:
         required: false
         description: target release branch
         default: main
@@ -18,11 +18,11 @@ on:
       should_fail:
         description: simulate failure of workflow
         required: false
-        type: boolean
+        type: string
       should_timeout:
         description: simulation timeout of workflow
         required: false
-        type: boolean
+        type: string
     secrets:
       app_id:
         required: true
@@ -53,9 +53,9 @@ jobs:
           app: flecs-${{ inputs.name }}
           data: >
             {
-              "tag_name": "${{ inputs.env_webapp_version }}",
-              "target_commitish": ${{ inputs.env_webapp_branch }},
-              "name":"${{ inputs.env_webapp_version }}",
+              "tag_name": "${{ inputs.env_version }}",
+              "target_commitish": ${{ inputs.env_branch }},
+              "name":"${{ inputs.env_version }}",
               "body":"Automated dummy release",
               "draft": false,
               "prerelease": false,
@@ -71,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           OWNER: FLECS-Technologies
           REPO: flecs-${{ inputs.name }}
-          TAG: ${{ inputs.env_webapp_version }}
+          TAG: ${{ inputs.env_version }}
         run: |
           for i in {1..10}; do
             echo "Checking if release $TAG exists"
