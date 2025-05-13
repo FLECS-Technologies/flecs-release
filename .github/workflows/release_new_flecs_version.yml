@@ -70,22 +70,17 @@ jobs:
 
   release_webapp:
     if: inputs.webapp_version != ''
-    runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token]
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Create release
-      uses: ./.github/actions/create_release
-      with:
-        name: webapp-dummy
-        env_webapp_version: ${{ inputs.webapp_version }}
-        env_webapp_branch: ${{ inputs.webapp_branch }}
-        should_fail: ${{ inputs.test_should_fail }}
-        should_timeout: ${{ inputs.test_should_timeout }}
-        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    with:
+      name: webapp-dummy
+      env_webapp_version: ${{ inputs.webapp_version }}
+      env_webapp_branch: ${{ inputs.webapp_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
 
   check_build_webapp:
     if: inputs.webapp_version != ''
@@ -96,22 +91,17 @@ jobs:
 
   release_build:
     if: inputs.build_version != ''
-    runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token]
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Create release
-      uses: ./.github/actions/create_release
-      with:
-        name: build-dummy
-        env_webapp_version: ${{ inputs.build_version }}
-        env_webapp_branch: ${{ inputs.build_branch }}
-        should_fail: ${{ inputs.test_should_fail }}
-        should_timeout: ${{ inputs.test_should_timeout }}
-        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    with:
+      name: build-dummy
+      env_webapp_version: ${{ inputs.webapp_version }}
+      env_webapp_branch: ${{ inputs.webapp_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
 
   check_build_build:
     if: inputs.core_version != ''
@@ -122,22 +112,17 @@ jobs:
 
   release_public:
     if: inputs.build_version != ''
-    runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token, release_build, check_build_build]
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Create release
-      uses: ./.github/actions/create_release
-      with:
-        name: public-dummy
-        env_webapp_version: ${{ inputs.build_version }}
-        env_webapp_branch: ${{ inputs.build_branch }}
-        should_fail: ${{ inputs.test_should_fail }}
-        should_timeout: ${{ inputs.test_should_timeout }}
-        app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    with:
+      name: public-dummy
+      env_webapp_version: ${{ inputs.webapp_version }}
+      env_webapp_branch: ${{ inputs.webapp_branch }}
+      should_fail: ${{ inputs.test_should_fail }}
+      should_timeout: ${{ inputs.test_should_timeout }}
+    secrets:
+      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
 
   check_build_public:
     if: inputs.core_version != ''
