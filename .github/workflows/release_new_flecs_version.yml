@@ -95,7 +95,7 @@ jobs:
       name: webapp-dummy
 
   release_build:
-    if: inputs.webapp_version != ''
+    if: inputs.build_version != ''
     runs-on: ubuntu-latest
     needs: [validate_inputs, generate_token]
     steps:
