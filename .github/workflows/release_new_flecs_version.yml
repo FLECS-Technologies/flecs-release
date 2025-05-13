@@ -71,7 +71,7 @@ jobs:
   release_webapp:
     if: inputs.webapp_version != ''
     needs: [validate_inputs, generate_token]
-    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: webapp-dummy
       env_webapp_version: ${{ inputs.webapp_version }}
@@ -92,7 +92,7 @@ jobs:
   release_build:
     if: inputs.build_version != ''
     needs: [validate_inputs, generate_token]
-    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: build-dummy
       env_webapp_version: ${{ inputs.webapp_version }}
@@ -113,7 +113,7 @@ jobs:
   release_public:
     if: inputs.build_version != ''
     needs: [validate_inputs, generate_token, release_build, check_build_build]
-    uses: FLECS-Technologies/flecs-release/.github/workflows/create-release.yml@main
+    uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: public-dummy
       env_webapp_version: ${{ inputs.webapp_version }}
