@@ -45,7 +45,7 @@ runs:
 
           echo "Release workflow id: $matching_job_id"
 
-          job_status=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          job_status=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$"))
             | .status
@@ -53,7 +53,7 @@ runs:
 
           echo "Job status of release_${{ inputs.name }} / release: $job_status"
 
-          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$"))
             | .conclusion
