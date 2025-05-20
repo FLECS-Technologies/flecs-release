@@ -33,6 +33,9 @@ runs:
           jobs_response=$(curl -s -H "Authorization: token ${{ inputs.github_token }}" \
             https://api.github.com/repos/FLECS-Technologies/flecs-release/actions/runs/${run_id}/jobs)
 
+          echo "Found jobs:"
+          echo "$jobs_response" | jq -r '.jobs[].name'
+
           matching_job_id=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$")) #change later for real repositories, only for dummy repos now
