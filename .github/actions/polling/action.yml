@@ -20,6 +20,7 @@ runs:
         INTERVAL=30
         COUNTER=0
         FOUND=false
+        short_name=$(echo "${{ inputs.name }}" | cut -d'-' -f1) #remove later for real repositories
 
         while [[ $COUNTER -lt $MAX_RETRIES ]]; do
           echo "Attempt $((COUNTER+1)) of $MAX_RETRIES"
@@ -36,7 +37,7 @@ runs:
           echo "Found jobs:"
           echo "$jobs_response" | jq -r '.jobs[].name'
 
-          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$")) #change later for real repositories, only for dummy repos now
             | .id
