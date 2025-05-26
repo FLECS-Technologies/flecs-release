@@ -1,6 +1,6 @@
 name: Release new version
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       core_version:
         description: New core version
