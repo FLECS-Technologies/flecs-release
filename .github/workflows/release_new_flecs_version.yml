@@ -102,6 +102,7 @@ jobs:
     with:
       name: build-dummy
       env_version: ${{ inputs.core_version }}
+      gh_token: ${{ needs.generate_token.outputs.app_token }}
 
   release_public:
     if: inputs.core_version != ''
@@ -124,3 +125,4 @@ jobs:
     with:
       name: public-dummy
       env_version: ${{ inputs.core_version }}
+      gh_token: ${{ needs.generate_token.outputs.app_token }}
