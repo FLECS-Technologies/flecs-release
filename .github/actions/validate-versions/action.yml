@@ -41,16 +41,4 @@ runs:
         else
           echo "Skipping core, version not provided"
         fi
-
-        if [[ -n "${{ inputs.console_version }}" ]]; then
-          echo "Checking console version: '${{ inputs.console_version }}'"
-          if [[ ! "${{ inputs.console_version }}" =~ $CONSOLE_PATTERN ]]; then
-            echo "Console version '${{ inputs.console_version }}' does not match a valid pattern" >&2
-            exit 1
-          else
-            echo "Console version is valid"
-          fi
-        else
-          echo "Skipping console, version not provided"
-        fi
       shell: bash
