@@ -16,12 +16,10 @@ runs:
   steps:
     - id: poll
       run: |
-        exit 1
         MAX_RETRIES=50
         INTERVAL=30
         COUNTER=0
         FOUND=false
-        short_name=$(echo "${{ inputs.name }}" | cut -d'-' -f1) #remove later for real repositories
 
         while [[ $COUNTER -lt $MAX_RETRIES ]]; do
           echo "Attempt $((COUNTER+1)) of $MAX_RETRIES"
@@ -38,15 +36,15 @@ runs:
           echo "Found jobs:"
           echo "$jobs_response" | jq -r '.jobs[].name'
 
-          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
+          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
-            | select(.name | test("^release_" + $name + " / release$")) #change later for real repositories, only for dummy repos now
+            | select(.name | test("^release_" + $name + " / release$"))
             | .id
           ')
 
           echo "Release workflow id: $matching_job_id"
 
-          job_status=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
+          job_status=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$"))
             | .status
@@ -54,7 +52,7 @@ runs:
 
           echo "Job status of release_${{ inputs.name }} / release: $job_status"
 
-          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "$short_name" '
+          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
             | select(.name | test("^release_" + $name + " / release$"))
             | .conclusion
