@@ -79,6 +79,7 @@ jobs:
     with:
       name: webapp-dummy
       env_version: ${{ inputs.webapp_version }}
+      gh_token: ${{ needs.generate_token.outputs.app_token }}
 
   release_build:
     if: inputs.core_version != ''
