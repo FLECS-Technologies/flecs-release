@@ -54,16 +54,16 @@ jobs:
           private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
           owner: FLECS-Technologies
           repositories: |
-            flecs-webapp-dummy
-            flecs-build-dummy
-            flecs-public-dummy
+            flecs-webapp
+            flecs-build
+            flecs-public
 
   release_webapp:
     if: inputs.webapp_version != ''
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
-      name: webapp-dummy
+      name: webapp
       env_version: ${{ inputs.webapp_version }}
       env_branch: ${{ inputs.webapp_branch }}
       should_fail: ${{ inputs.test_should_fail }}
@@ -77,7 +77,7 @@ jobs:
     needs: release_webapp
     uses: ./.github/workflows/check_build_job.yml
     with:
-      name: webapp-dummy
+      name: webapp
       env_version: ${{ inputs.webapp_version }}
 
   release_build:
@@ -85,7 +85,7 @@ jobs:
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
-      name: build-dummy
+      name: build
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ inputs.core_branch }}
       should_fail: ${{ inputs.test_should_fail }}
@@ -99,7 +99,7 @@ jobs:
     needs: release_build
     uses: ./.github/workflows/check_build_job.yml
     with:
-      name: build-dummy
+      name: build
       env_version: ${{ inputs.core_version }}
 
   release_public:
@@ -107,7 +107,7 @@ jobs:
     needs: [validate_inputs, generate_token, release_build, check_build_build]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
-      name: public-dummy
+      name: public
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ inputs.core_branch }}
       should_fail: ${{ inputs.test_should_fail }}
@@ -121,5 +121,5 @@ jobs:
     needs: [check_build_build, release_public]
     uses: ./.github/workflows/check_build_job.yml
     with:
-      name: public-dummy
+      name: public
       env_version: ${{ inputs.core_version }}
