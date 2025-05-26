@@ -35,7 +35,7 @@ jobs:
         with:
           name: ${{ inputs.name }}
           tag: ${{ inputs.env_version }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }} #needs token with delete permission
 
   check_build:
     needs: wait_for_run_completion
