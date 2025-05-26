@@ -10,10 +10,6 @@ on:
         description: New webapp version
         required: false
         type: string
-      console_version:
-        description: New console version
-        required: false
-        type: string
       core_branch:
         description: Branch for new core version
         required: false
@@ -21,11 +17,6 @@ on:
         default: main
       webapp_branch:
         description: Branch for new webapp version
-        required: false
-        type: string
-        default: main
-      console_branch:
-        description: Branch for new console version
         required: false
         type: string
         default: main
@@ -90,7 +81,7 @@ jobs:
       name: webapp-dummy
 
   release_build:
-    if: inputs.build_version != ''
+    if: inputs.core_version != ''
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
@@ -111,7 +102,7 @@ jobs:
       name: build-dummy
 
   release_public:
-    if: inputs.build_version != ''
+    if: inputs.core_version != ''
     needs: [validate_inputs, generate_token, release_build, check_build_build]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
