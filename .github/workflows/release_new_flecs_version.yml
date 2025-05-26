@@ -1,6 +1,6 @@
 name: Release new version
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       core_version:
         description: New core version
@@ -40,7 +40,6 @@ jobs:
         with:
           core_version: ${{ inputs.core_version }}
           webapp_version: ${{ inputs.webapp_version }}
-          console_version: ${{ inputs.console_version }}
 
   generate_token:
     runs-on: ubuntu-latest
@@ -79,6 +78,7 @@ jobs:
     uses: ./.github/workflows/check_build_job.yml
     with:
       name: webapp-dummy
+      env_version: ${{ inputs.webapp_version }}
 
   release_build:
     if: inputs.core_version != ''
@@ -86,8 +86,8 @@ jobs:
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: build-dummy
-      env_version: ${{ inputs.webapp_version }}
-      env_branch: ${{ inputs.webapp_branch }}
+      env_version: ${{ inputs.core_version }}
+      env_branch: ${{ inputs.core_branch }}
       should_fail: ${{ inputs.test_should_fail }}
       should_timeout: ${{ inputs.test_should_timeout }}
     secrets:
@@ -100,6 +100,7 @@ jobs:
     uses: ./.github/workflows/check_build_job.yml
     with:
       name: build-dummy
+      env_version: ${{ inputs.core_version }}
 
   release_public:
     if: inputs.core_version != ''
@@ -107,8 +108,8 @@ jobs:
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: public-dummy
-      env_version: ${{ inputs.webapp_version }}
-      env_branch: ${{ inputs.webapp_branch }}
+      env_version: ${{ inputs.core_version }}
+      env_branch: ${{ inputs.core_branch }}
       should_fail: ${{ inputs.test_should_fail }}
       should_timeout: ${{ inputs.test_should_timeout }}
     secrets:
@@ -121,3 +122,4 @@ jobs:
     uses: ./.github/workflows/check_build_job.yml
     with:
       name: public-dummy
+      env_version: ${{ inputs.core_version }}
