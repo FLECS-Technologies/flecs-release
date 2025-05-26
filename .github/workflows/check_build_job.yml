@@ -10,6 +10,10 @@ on:
         description: Version of current release
         required: true
         type: string
+      gh_token:
+        description: Token from previous workflow
+        required: true
+        type: string
 jobs:
   wait_for_run_completion:
     runs-on: ubuntu-latest
@@ -35,7 +39,7 @@ jobs:
         with:
           name: ${{ inputs.name }}
           tag: ${{ inputs.env_version }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ inputs.gh_token }}
 
   check_build:
     needs: wait_for_run_completion
