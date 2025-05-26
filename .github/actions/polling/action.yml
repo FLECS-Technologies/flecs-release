@@ -16,6 +16,7 @@ runs:
   steps:
     - id: poll
       run: |
+        exit 1
         MAX_RETRIES=50
         INTERVAL=30
         COUNTER=0
