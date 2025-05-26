@@ -6,6 +6,10 @@ on:
         description: Name of repository
         required: true
         type: string
+      env_version:
+        description: Version of current release
+        required: true
+        type: string
 jobs:
   wait_for_run_completion:
     runs-on: ubuntu-latest
@@ -26,7 +30,7 @@ jobs:
       - uses: ./.github/actions/delete-release-on-fail
         with:
           name: ${{ inputs.name }}
-          tag: ${{ inputs.tag }}
+          tag: ${{ inputs.env_version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   check_build:
