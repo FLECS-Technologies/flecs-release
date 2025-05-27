@@ -80,6 +80,20 @@ jobs:
       name: webapp
       env_version: ${{ inputs.webapp_version }}
 
+  increment_version_to_next_webapp:
+    needs: [release_webapp, check_build_webapp]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Increment version number
+        uses: ./.github/actions/increment-to-next
+        with:
+          tag: ${{ inputs.webapp_version }}
+          repo: webapp
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   release_build:
     if: inputs.core_version != ''
     needs: [validate_inputs, generate_token]
@@ -102,6 +116,20 @@ jobs:
       name: build
       env_version: ${{ inputs.core_version }}
 
+  increment_version_to_next_build:
+    needs: [release_build, check_build_build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Increment version number
+        uses: ./.github/actions/increment-to-next
+        with:
+          tag: ${{ inputs.core_version }}
+          repo: build
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   release_public:
     if: inputs.core_version != ''
     needs: [validate_inputs, generate_token, release_build, check_build_build]
@@ -123,3 +151,17 @@ jobs:
     with:
       name: public
       env_version: ${{ inputs.core_version }}
+
+  increment_version_to_next_public:
+    needs: [release_public, check_build_public]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Increment version number
+        uses: ./.github/actions/increment-to-next
+        with:
+          tag: ${{ inputs.core_version }}
+          repo: public
+          github_token: ${{ secrets.GITHUB_TOKEN }}
