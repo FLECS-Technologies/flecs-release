@@ -1,0 +1,64 @@
+name: Create next version tag
+description: Creates a new tag base on the current release version
+
+inputs:
+    tag:
+        description: Released version
+        required: true
+    repo:
+        description: Repository name
+        required: true
+    github_token:
+        description: GitHub Token
+        required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -e
+
+        VERSION="${{ inputs.tag }}"
+        REPO="${{ inputs.repo }}"
+        TOKEN="${{ inputs.github_token }}"
+        NEW_TAG="${VERSION}-next"
+
+        echo "Waiting for tag $VERSION to become available"
+
+        TRIES=10
+        DELAY=3
+        FOUND=false
+
+        for ((i=1;i<=TRIES;i++)); do
+        REF_RESPONSE=$(curl -s -H "Authorization: token $TOKEN" \
+            "https://api.github.com/repos/FLECS-Technologies/flecs-$REPO/git/refs/tags/$VERSION")
+
+        REF_SHA=$(echo "$REF_RESPONSE" | jq -r '.object.sha')
+        if [[ "$REF_SHA" != "null" && -n "$REF_SHA" ]]; then
+            FOUND=true
+            break
+        fi
+
+        echo "Attempt $i/$TRIES: Tag not found, waiting $DELAY seconds"
+        sleep $DELAY
+        done
+
+        if [[ "$FOUND" == "false" ]]; then
+            echo "Timeout: Tag $VERSION not found."
+            exit 1
+        fi
+
+        COMMIT_SHA=$(curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/repos/FLECS-Technologies/flecs-$REPO/git/refs/tags/$VERSION" \
+          | jq -r '.object.sha')
+
+        if [[ -z "$COMMIT_SHA" || "$COMMIT_SHA" == "null" ]]; then
+          echo "Commit SHA for $VERSION not found"
+          exit 1
+        fi
+
+        curl -s -X POST -H "Authorization: token $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"ref\": \"refs/tags/$NEW_TAG\", \"sha\": \"$COMMIT_SHA\"}" \
+          "https://api.github.com/repos/FLECS-Technologies/flecs-$REPO/git/refs"
