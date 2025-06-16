@@ -1,0 +1,47 @@
+name: Bump WebApp Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Released version tag
+        required: true
+        type: string
+      repo:
+        description: Repository where version needs to be bumped
+        required: true
+        type: string
+      #repo_token:
+        #description: GitHub Token with repo access
+        #required: true
+        #type: string
+
+jobs:
+  bump-webapp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: FLECS-Technologies/flecs-${{ inputs.repo }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ inputs.repo }}
+
+      - name: Checkout flecs-release
+        uses: actions/checkout@v4
+        with:
+          path: flecs-release
+
+      - name: Bump webapp action
+        if: ${{ inputs.repo == 'webapp-dummy' }}
+        uses: ./flecs-release/.github/actions/bump-webapp-to-next-version
+        with:
+          tag: ${{ inputs.tag }}
+          target_dir: ${{ github.workspace }}/webapp-dummy
+
+      #- name: Bump public action
+      #  if: ${{ inputs.repo == 'public' }}
+      #  uses: ./flecs-release/.github/actions/bump-public-to-next-version
+      #  with:
+      #    tag: ${{ inputs.tag }}
+      #    target_dir: ${{ github.workspace }}/public
