@@ -1,0 +1,45 @@
+name: Bump WebApp to Next Version
+description: Updates version in package.json and package-lock.json to next version
+
+inputs:
+  tag:
+    description: Released version
+    required: true
+  target_dir:
+    description: Directory where files are located
+    required: true
+  #repo_token:
+    #description: GitHub Token with repo access
+    #required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -e
+
+        TARGET_DIR="${{ inputs.target_dir }}"
+        RAW_TAG="${{ inputs.tag }}"
+        CLEAN_TAG="${RAW_TAG#v}"
+        NEXT_VERSION="${CLEAN_TAG}-next"
+
+        echo "TARGET_DIR is $TARGET_DIR"
+        ls -al "$TARGET_DIR"
+
+        # Check & replace in package.json
+        jq -e --arg old "$CLEAN_TAG" 'select(.version == $old)' "$TARGET_DIR/package.json" > /dev/null \
+          || { echo "package.json doesn't match expected version: $CLEAN_TAG"; exit 1; }
+
+        jq --arg old "$CLEAN_TAG" --arg new "$NEXT_VERSION" \
+          'if .version == $old then .version = $new else . end' \
+          "$TARGET_DIR/package.json" > "$TARGET_DIR/package.tmp" && mv "$TARGET_DIR/package.tmp" "$TARGET_DIR/package.json"
+
+        # Check & replace in package-lock.json
+        jq --arg old "$CLEAN_TAG" --arg new "$NEXT_VERSION" '
+          if .version == $old then .version = $new else . end |
+          if .packages and .packages[""] and .packages[""].version == $old
+            then .packages[""].version = $new
+            else .
+          end
+        ' "$TARGET_DIR/package-lock.json" > "$TARGET_DIR/lock.tmp" && mv "$TARGET_DIR/lock.tmp" "$TARGET_DIR/package-lock.json"
