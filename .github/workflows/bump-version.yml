@@ -45,3 +45,20 @@ jobs:
       #  with:
       #    tag: ${{ inputs.tag }}
       #    target_dir: ${{ github.workspace }}/public
+
+      - name: Commit & push version bump
+        run: |
+          cd ${{ github.workspace }}/webapp-dummy
+
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FLECS-Technologies/webapp-dummy.git
+
+          if ! git diff --quiet; then
+            git add package*.json
+            git commit -m "chore: bump version to ${{ inputs.tag }}-next"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi
