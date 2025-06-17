@@ -27,6 +27,11 @@ runs:
         echo "TARGET_DIR is $TARGET_DIR"
         ls -al "$TARGET_DIR"
 
+        echo "CLEAN_TAG: $CLEAN_TAG"
+        echo "TARGET_DIR: $TARGET_DIR"
+        echo "package.json content:"
+        cat "$TARGET_DIR/package.json"
+
         # Check & replace in package.json
         jq -e --arg old "$CLEAN_TAG" 'select(.version == $old)' "$TARGET_DIR/package.json" > /dev/null \
           || { echo "package.json doesn't match expected version: $CLEAN_TAG"; exit 1; }
