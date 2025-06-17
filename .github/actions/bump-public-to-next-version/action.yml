@@ -1,0 +1,98 @@
+name: Bump public to next version
+description: Updates version in to next version
+
+inputs:
+  tag:
+    description: Released version
+    required: true
+  target_dir:
+    description: Directory where files are located
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        set -e
+
+        TARGET_DIR="${{ inputs.target_dir }}"
+        RAW_TAG="${{ inputs.tag }}"
+        CLEAN_TAG="${RAW_TAG#v}"
+        NEXT_TAG="${CLEAN_TAG}-next"
+        VERSION="${CLEAN_TAG%%-*}"
+        NEXT_VERSION="${VERSION}-next"
+
+        CARGOFILE="$TARGET_DIR/.cargo/cargo.toml"
+        VS_CODE_FILE="$TARGET_DIR/.vscode/c_cpp_properties.json"
+        TXTFILE="$TARGET_DIR/CMakeLists.txt"
+        READMEFILE="$TARGET_DIR/README.md"
+        COMPOSEFILE="$TARGET_DIR/pkg/fs/etc/flecs/docker-compose.yml"
+
+        # cargo.toml
+        if grep -q "FLECS_VERSION = \"$VERSION\"" "$CARGOFILE"; then
+          sed -i "s/FLECS_VERSION = \"$VERSION\"/FLECS_VERSION = \"$NEXT_VERSION\"/" "$CARGOFILE"
+        else
+          echo "FLECS_VERSION = \"$VERSION\" not found"
+          exit 1
+        fi
+
+        # c_cpp_properties.json
+        SEARCH="FLECS_VERSION=\"${CLEAN_TAG}\""
+        REPLACE="FLECS_VERSION=\"${NEXT_TAG}\""
+
+        if ! jq --arg target "$SEARCH" '.configurations[0].defines | index($target)' "$VS_CODE_FILE" | grep -q '[0-9]'; then
+          echo "FLECS_VERSION = '$SEARCH' not found"
+          exit 1
+        fi
+
+        jq --arg old "$SEARCH" \
+          --arg new "$REPLACE" \
+          '
+          .configurations[0].defines |= map(
+            if . == $old then $new else . end
+          )
+          ' "$VS_CODE_FILE" > "$VS_CODE_FILE.tmp" && mv "$VS_CODE_FILE.tmp" "$VS_CODE_FILE"
+
+        # CMakeLists.txt
+        if grep -q "VERSION ${VERSION}" "$TXTFILE"; then
+          sed -i "s|VERSION ${VERSION}|VERSION ${NEXT_VERSION}|" "$TXTFILE"
+        else
+          echo "VERSION = '$VERSION' not found"
+          exit 1
+        fi
+
+        # README.md
+        SEARCH="flecspublic.azurecr.io/flecs-build:v${CLEAN_TAG}"
+        REPLACE="flecspublic.azurecr.io/flecs-build:v${NEXT_TAG}"
+
+        if grep -q "$SEARCH" "$READMEFILE"; then
+          sed -i "s|$SEARCH|$REPLACE|g" "$READMEFILE"
+        else
+          echo "$SEARCH not found"
+          exit 1
+        fi
+
+        # docker-compose.yml
+        # flecsd image
+        SEARCH1="flecs/flecs-slim:${CLEAN_TAG}-dev"
+        REPLACE1="flecs/flecs-slim:${NEXT_TAG}-dev"
+
+        # webapp image
+        SEARCH2="flecs/webapp:${CLEAN_TAG}-dev"
+        REPLACE2="flecs/webapp:${NEXT_TAG}-dev"
+
+        if grep -q "$SEARCH1" "$COMPOSEFILE"; then
+          sed -i "s|$SEARCH1|$REPLACE1|g" "$COMPOSEFILE"
+        else
+          echo "Not found: $SEARCH1"
+          exit 1
+        fi
+
+        # Check and replace webapp
+        if grep -q "$SEARCH2" "$COMPOSEFILE"; then
+          sed -i "s|$SEARCH2|$REPLACE2|g" "$COMPOSEFILE"
+        else
+          echo "Not found: $SEARCH2"
+          exit 1
+        fi
