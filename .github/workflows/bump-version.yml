@@ -1,4 +1,4 @@
-name: Bump WebApp Version
+name: Bump new version
 
 on:
   workflow_dispatch:
@@ -46,7 +46,7 @@ jobs:
           tag: ${{ inputs.tag }}
           target_dir: ${{ github.workspace }}/public-dummy
 
-      - name: Commit & push version bump
+      - name: Commit & push version bump for webapp
         if: ${{ inputs.repo == 'webapp-dummy' }}
         run: |
           cd ${{ github.workspace }}/webapp-dummy
