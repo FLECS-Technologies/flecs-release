@@ -8,9 +8,6 @@ inputs:
   target_dir:
     description: Directory where files are located
     required: true
-  #repo_token:
-    #description: GitHub Token with repo access
-    #required: true
 
 runs:
   using: composite
@@ -23,14 +20,6 @@ runs:
         RAW_TAG="${{ inputs.tag }}"
         CLEAN_TAG="${RAW_TAG#v}"
         NEXT_VERSION="${CLEAN_TAG}-next"
-
-        echo "TARGET_DIR is $TARGET_DIR"
-        ls -al "$TARGET_DIR"
-
-        echo "CLEAN_TAG: $CLEAN_TAG"
-        echo "TARGET_DIR: $TARGET_DIR"
-        echo "package.json content:"
-        cat "$TARGET_DIR/package.json"
 
         # Check & replace in package.json
         jq -e --arg old "$CLEAN_TAG" 'select(.version == $old)' "$TARGET_DIR/package.json" > /dev/null \
@@ -48,6 +37,3 @@ runs:
             else .
           end
         ' "$TARGET_DIR/package-lock.json" > "$TARGET_DIR/lock.tmp" && mv "$TARGET_DIR/lock.tmp" "$TARGET_DIR/package-lock.json"
-
-        echo "Updated package-lock.json:"
-        cat "$TARGET_DIR/package-lock.json"
