@@ -48,3 +48,6 @@ runs:
             else .
           end
         ' "$TARGET_DIR/package-lock.json" > "$TARGET_DIR/lock.tmp" && mv "$TARGET_DIR/lock.tmp" "$TARGET_DIR/package-lock.json"
+
+        echo "Updated package-lock.json:"
+        cat "$TARGET_DIR/package-lock.json"
