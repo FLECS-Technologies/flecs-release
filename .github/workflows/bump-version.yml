@@ -47,6 +47,7 @@ jobs:
           target_dir: ${{ github.workspace }}/public-dummy
 
       - name: Commit & push version bump
+        if: ${{ inputs.repo == 'webapp-dummy' }}
         run: |
           cd ${{ github.workspace }}/webapp-dummy
 
