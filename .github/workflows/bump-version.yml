@@ -1,7 +1,7 @@
 name: Bump new version
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
         description: Released version tag
@@ -11,13 +11,9 @@ on:
         description: Repository where version needs to be bumped
         required: true
         type: string
-      #app_token:
-        #description: Token for specific repository
-        #required: true
-        #type: string
 
 jobs:
-  bump-webapp:
+  bump-new-version:
     runs-on: ubuntu-latest
     steps:
       - name: Generate GitHub App Token
@@ -28,18 +24,9 @@ jobs:
           private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
           owner: FLECS-Technologies
           repositories: |
-            flecs-webapp-dummy
-            flecs-public-dummy
+            flecs-webapp
+            flecs-public
             flecs-release
-
-      - name: Debug app token presence
-        run: |
-          if [ -z "${{ steps.app-token.outputs.token }}" ]; then
-            echo "App token is empty"
-            exit 1
-          else
-            echo "App token was created"
-          fi
 
       - name: Checkout target repo
         uses: actions/checkout@v4
@@ -54,28 +41,28 @@ jobs:
           path: flecs-release
 
       - name: Bump webapp action
-        if: ${{ inputs.repo == 'webapp-dummy' }}
+        if: ${{ inputs.repo == 'webapp' }}
         uses: ./flecs-release/.github/actions/bump-webapp-to-next-version
         with:
           tag: ${{ inputs.tag }}
-          target_dir: ${{ github.workspace }}/webapp-dummy
+          target_dir: ${{ github.workspace }}/webapp
 
       - name: Bump public action
-        if: ${{ inputs.repo == 'public-dummy' }}
+        if: ${{ inputs.repo == 'public' }}
         uses: ./flecs-release/.github/actions/bump-public-to-next-version
         with:
           tag: ${{ inputs.tag }}
-          target_dir: ${{ github.workspace }}/public-dummy
+          target_dir: ${{ github.workspace }}/public
 
       - name: Commit & push version bump for webapp
-        if: ${{ inputs.repo == 'webapp-dummy' }}
+        if: ${{ inputs.repo == 'webapp' }}
         run: |
-          cd ${{ github.workspace }}/webapp-dummy
+          cd ${{ github.workspace }}/webapp
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp.git
 
           if ! git diff --quiet; then
             git add package*.json
@@ -86,14 +73,14 @@ jobs:
           fi
 
       - name: Commit & push version bump for public
-        if: ${{ inputs.repo == 'public-dummy' }}
+        if: ${{ inputs.repo == 'public' }}
         run: |
-          cd ${{ github.workspace }}/public-dummy
+          cd ${{ github.workspace }}/public
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public-dummy.git
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public.git
 
           if ! git diff --quiet; then
             git add \
