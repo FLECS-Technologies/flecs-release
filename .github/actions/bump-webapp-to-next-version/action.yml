@@ -1,4 +1,4 @@
-name: Bump WebApp to Next Version
+name: Bump webapp to next version
 description: Updates version in package.json and package-lock.json to next version
 
 inputs:
