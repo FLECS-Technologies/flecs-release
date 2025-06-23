@@ -20,6 +20,27 @@ jobs:
   bump-webapp:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+          owner: FLECS-Technologies
+          repositories: |
+            flecs-webapp-dummy
+            flecs-public-dummy
+            flecs-release
+
+      - name: Debug app token presence
+        run: |
+          if [ -z "${{ steps.app-token.outputs.token }}" ]; then
+            echo "App token is empty"
+            exit 1
+          else
+            echo "App token was created"
+          fi
+
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
@@ -48,15 +69,13 @@ jobs:
 
       - name: Commit & push version bump for webapp
         if: ${{ inputs.repo == 'webapp-dummy' }}
-        env:
-          TOKEN: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
         run: |
           cd ${{ github.workspace }}/webapp-dummy
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${TOKEN}@github.com/FLECS-Technologies/flecs-webapp-dummy.git
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
 
           if ! git diff --quiet; then
             git add package*.json
