@@ -48,13 +48,15 @@ jobs:
 
       - name: Commit & push version bump for webapp
         if: ${{ inputs.repo == 'webapp-dummy' }}
+        env:
+          TOKEN: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
         run: |
           cd ${{ github.workspace }}/webapp-dummy
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
+          git remote set-url origin https://x-access-token:${TOKEN}@github.com/FLECS-Technologies/flecs-webapp-dummy.git
 
           if ! git diff --quiet; then
             git add package*.json
