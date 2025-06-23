@@ -84,3 +84,21 @@ jobs:
           else
             echo "No changes to commit"
           fi
+
+      - name: Commit & push version bump for public
+        if: ${{ inputs.repo == 'public-dummy' }}
+        run: |
+          cd ${{ github.workspace }}/public-dummy
+
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public-dummy.git
+
+          if ! git diff --quiet; then
+            git add package*.json
+            git commit -m "chore: bump version to ${{ inputs.tag }}-next"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi
