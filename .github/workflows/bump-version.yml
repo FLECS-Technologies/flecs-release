@@ -97,7 +97,7 @@ jobs:
 
           if ! git diff --quiet; then
             git add \
-              .cargo/config.toml \
+              .cargo/cargo.toml \
               .vscode/c_cpp_properties.json \
               CMakeLists.txt \
               README.md \
