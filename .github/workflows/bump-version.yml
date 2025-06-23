@@ -54,7 +54,7 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ secrets.FLECS_WORKFLOW_AUTOMATION_APP_ID }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
+          git remote set-url origin https://x-access-token:${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
 
           if ! git diff --quiet; then
             git add package*.json
