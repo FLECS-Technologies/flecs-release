@@ -96,7 +96,13 @@ jobs:
           git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public-dummy.git
 
           if ! git diff --quiet; then
-            git add package*.json
+            git add \
+              .cargo/config.toml \
+              .vscode/c_cpp_properties.json \
+              CMakeLists.txt \
+              README.md \
+              pkg/fs/etc/flecs/docker-compose.yml
+
             git commit -m "chore: bump version to ${{ inputs.tag }}-next"
             git push origin HEAD
           else
