@@ -20,17 +20,6 @@ jobs:
   bump-webapp:
     runs-on: ubuntu-latest
     steps:
-      - name: Generate GitHub App Token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-          private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
-          owner: FLECS-Technologies
-          repositories: |
-            flecs-webapp-dummy
-            flecs-public-dummy
-
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
@@ -65,7 +54,7 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
+          git remote set-url origin https://x-access-token:${{ secrets.FLECS_WORKFLOW_AUTOMATION_APP_ID }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git #needs Token with permission to write
 
           if ! git diff --quiet; then
             git add package*.json
