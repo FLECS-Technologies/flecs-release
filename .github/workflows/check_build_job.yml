@@ -23,20 +23,6 @@ jobs:
           name: ${{ inputs.name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  delete_release_on_failure:
-    needs: wait_for_run_completion
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone repository
-        uses: actions/checkout@v4
-
-      - uses: ./.github/actions/delete-release-on-fail
-        with:
-          name: ${{ inputs.name }}
-          tag: ${{ inputs.env_version }}
-          github_token: ${{ secrets.GITHUB_TOKEN }} #needs token with delete permission
-
   check_build:
     needs: wait_for_run_completion
     runs-on: ubuntu-latest
