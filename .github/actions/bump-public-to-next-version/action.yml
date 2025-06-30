@@ -54,14 +54,6 @@ runs:
           )
           ' "$VS_CODE_FILE" > "$VS_CODE_FILE.tmp" && mv "$VS_CODE_FILE.tmp" "$VS_CODE_FILE"
 
-        # CMakeLists.txt
-        if grep -q "VERSION ${VERSION}" "$TXTFILE"; then
-          sed -i "s|VERSION ${VERSION}|VERSION ${NEXT_VERSION}|" "$TXTFILE"
-        else
-          echo "VERSION = '$VERSION' not found"
-          exit 1
-        fi
-
         # README.md
         SEARCH="flecspublic.azurecr.io/flecs-build:v${CLEAN_TAG}"
         REPLACE="flecspublic.azurecr.io/flecs-build:v${NEXT_TAG}"
