@@ -21,19 +21,9 @@ runs:
         CLEAN_TAG="${RAW_TAG#v}"
         NEXT_VERSION="${CLEAN_TAG}-next"
 
-        # Check & replace in package.json
-        jq -e --arg old "$CLEAN_TAG" 'select(.version == $old)' "$TARGET_DIR/package.json" > /dev/null \
-          || { echo "package.json doesn't match expected version: $CLEAN_TAG"; exit 1; }
+        jq --arg new_version "$NEXT_VERSION" '.version = $new_version' \
+            "$TARGET_DIR/package.json" > "$TARGET_DIR/package.tmp" && mv "$TARGET_DIR/package.tmp" "$TARGET_DIR/package.json"
 
-        jq --arg old "$CLEAN_TAG" --arg new "$NEXT_VERSION" \
-          'if .version == $old then .version = $new else . end' \
-          "$TARGET_DIR/package.json" > "$TARGET_DIR/package.tmp" && mv "$TARGET_DIR/package.tmp" "$TARGET_DIR/package.json"
-
-        # Check & replace in package-lock.json
-        jq --arg old "$CLEAN_TAG" --arg new "$NEXT_VERSION" '
-          if .version == $old then .version = $new else . end |
-          if .packages and .packages[""] and .packages[""].version == $old
-            then .packages[""].version = $new
-            else .
-          end
-        ' "$TARGET_DIR/package-lock.json" > "$TARGET_DIR/lock.tmp" && mv "$TARGET_DIR/lock.tmp" "$TARGET_DIR/package-lock.json"
+        jq --arg new_version "$NEXT_VERSION" \
+          '.version = $new_version | .packages[""].version = $new_version' \
+          "$TARGET_DIR/package-lock.json" > "$TARGET_DIR/lock.tmp" && mv "$TARGET_DIR/lock.tmp" "$TARGET_DIR/package-lock.json"
