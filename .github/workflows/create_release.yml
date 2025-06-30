@@ -15,20 +15,10 @@ on:
         description: target release branch
         default: main
         type: string
-      should_fail:
-        description: simulate failure of workflow
-        required: false
-        type: string
-      should_timeout:
-        description: simulation timeout of workflow
-        required: false
-        type: string
-    secrets:
-      app_id:
+      app_token:
         required: true
-      private_key:
-        required: true
-
+        description: App token for repos
+        type: string
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -36,16 +26,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create GitHub App installation access token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.app_id }}
-          private-key: ${{ secrets.private_key }}
-          owner: FLECS-Technologies
-          repositories: flecs-${{ inputs.name }}
+      - run: echo "${{ inputs.name }} Release"
 
-      - name: Create webapp release
+      - name: Create release
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner}/{app}/releases
@@ -64,11 +47,11 @@ jobs:
               "make_latest": "false"
             }
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ inputs.app_token }}
 
-      - name: Check webapp release
+      - name: Check release
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ inputs.app_token }}
           OWNER: FLECS-Technologies
           REPO: flecs-${{ inputs.name }}
           TAG: ${{ inputs.env_version }}
@@ -84,19 +67,4 @@ jobs:
             sleep 5
           done
           echo "Timed out waiting for release $TAG."
-          exit 1
-
-      - name: Simulate timeout
-        if: inputs.should_timeout == 'true'
-        run: |
-          echo "Simulating timeout..."
-          while true; do
-            echo "Hanging indefinitely..."
-            sleep 60
-          done
-
-      - name: Simulate failure
-        if: inputs.should_fail == 'true'
-        run: |
-          echo "Simulating failure..."
           exit 1
