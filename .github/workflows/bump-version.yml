@@ -47,13 +47,6 @@ jobs:
           tag: ${{ inputs.tag }}
           target_dir: ${{ github.workspace }}/webapp
 
-      - name: Bump public action
-        if: ${{ inputs.repo == 'public' }}
-        uses: ./flecs-release/.github/actions/bump-public-to-next-version
-        with:
-          tag: ${{ inputs.tag }}
-          target_dir: ${{ github.workspace }}/public
-
       - name: Commit & push version bump for webapp
         if: ${{ inputs.repo == 'webapp' }}
         run: |
