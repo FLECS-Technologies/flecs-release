@@ -20,14 +20,6 @@ on:
         required: false
         type: string
         default: main
-      test_should_fail:
-        description: simulate failure of workflow
-        required: false
-        type: string
-      test_should_timeout:
-        description: simulation timeout of workflow
-        required: false
-        type: string
 jobs:
   validate_inputs:
     runs-on: ubuntu-latest
@@ -66,11 +58,7 @@ jobs:
       name: webapp
       env_version: ${{ inputs.webapp_version }}
       env_branch: ${{ inputs.webapp_branch }}
-      should_fail: ${{ inputs.test_should_fail }}
-      should_timeout: ${{ inputs.test_should_timeout }}
-    secrets:
-      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_webapp:
     if: inputs.webapp_version != ''
@@ -80,27 +68,36 @@ jobs:
       name: webapp
       env_version: ${{ inputs.webapp_version }}
 
-  increment_version_to_next_webapp:
-    if: inputs.webapp_version != ''
-    needs: [release_webapp, check_build_webapp]
-    uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
-    with:
-      tag: ${{ inputs.webapp_version }}
-      repo: webapp
+  flecs_build_revision:
+    if: inputs.core_version != ''
+    needs: [generate_token, validate_inputs]
+    runs-on: ubuntu-latest
+    outputs:
+      build_sha: ${{ steps.extract.outputs.build_sha }}
+    steps:
+      - name: Checkout flecs-public
+        uses: actions/checkout@v4
+        with:
+          repository: FLECS-Technologies/flecs-public
+          ref: ${{ inputs.core_branch }}
+          token: ${{ needs.generate_token.outputs.app_token }}
+
+      - name: Extract flecs-build submodule revision
+        id: extract
+        run: |
+          git submodule update --init
+          BUILD_SHA=$(git ls-tree HEAD flecs-build | awk '{print $3}')
+          echo "build_sha=$BUILD_SHA" >> "$GITHUB_OUTPUT"
 
   release_build:
     if: inputs.core_version != ''
-    needs: [validate_inputs, generate_token]
+    needs: [validate_inputs, generate_token, flecs_build_revision]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
       name: build
       env_version: ${{ inputs.core_version }}
-      env_branch: ${{ inputs.core_branch }}
-      should_fail: ${{ inputs.test_should_fail }}
-      should_timeout: ${{ inputs.test_should_timeout }}
-    secrets:
-      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+      env_branch: ${{ needs.flecs_build_revision.outputs.build_sha }}
+      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_build:
     if: inputs.core_version != ''
@@ -118,11 +115,7 @@ jobs:
       name: public
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ inputs.core_branch }}
-      should_fail: ${{ inputs.test_should_fail }}
-      should_timeout: ${{ inputs.test_should_timeout }}
-    secrets:
-      app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-      private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_public:
     if: inputs.core_version != ''
@@ -132,10 +125,49 @@ jobs:
       name: public
       env_version: ${{ inputs.core_version }}
 
+  increment_version_to_next_webapp:
+    if: inputs.webapp_version != ''
+    needs: [release_webapp, check_build_webapp, release_build, release_public, check_build_build, check_build_public]
+    uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
+    with:
+      tag: ${{ inputs.webapp_version }}
+      repo: webapp
+
   increment_version_to_next_public:
     if: inputs.core_version != ''
-    needs: [release_public, check_build_public]
+    needs: [release_webapp, check_build_webapp, release_build, release_public, check_build_build, check_build_public]
     uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
     with:
       tag: ${{ inputs.core_version }}
       repo: public
+
+  delete_release_on_failure:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Delete webapp release
+        if: inputs.webapp_version != ''
+        uses: ./.github/actions/delete-release-on-fail
+        with:
+          name: webapp
+          tag: ${{ inputs.webapp_version }}
+          github_token: ${{ needs.generate_token.outputs.app_token }}
+
+      - name: Delete build release
+        if: inputs.core_version != ''
+        uses: ./.github/actions/delete-release-on-fail
+        with:
+          name: build
+          tag: ${{ inputs.core_version }}
+          github_token: ${{ needs.generate_token.outputs.app_token }}
+
+      - name: Delete public release
+        if: inputs.core_version != ''
+        uses: ./.github/actions/delete-release-on-fail
+        with:
+          name: public
+          tag: ${{ inputs.core_version }}
+          github_token: ${{ needs.generate_token.outputs.app_token }}
