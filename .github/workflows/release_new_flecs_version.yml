@@ -46,9 +46,9 @@ jobs:
           private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
           owner: FLECS-Technologies
           repositories: |
-            flecs-webapp
-            flecs-build
-            flecs-public
+            flecs-webapp-dummy
+            flecs-build-dummy
+            flecs-public-dummy
 
   release_webapp:
     if: inputs.webapp_version != ''
@@ -58,7 +58,6 @@ jobs:
       name: webapp
       env_version: ${{ inputs.webapp_version }}
       env_branch: ${{ inputs.webapp_branch }}
-      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_webapp:
     if: inputs.webapp_version != ''
@@ -80,7 +79,6 @@ jobs:
         with:
           repository: FLECS-Technologies/flecs-public
           ref: ${{ inputs.core_branch }}
-          token: ${{ needs.generate_token.outputs.app_token }}
 
       - name: Extract flecs-build submodule revision
         id: extract
@@ -97,7 +95,6 @@ jobs:
       name: build
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ needs.flecs_build_revision.outputs.build_sha }}
-      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_build:
     if: inputs.core_version != ''
@@ -115,7 +112,6 @@ jobs:
       name: public
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ inputs.core_branch }}
-      app_token: ${{ needs.generate_token.outputs.app_token }}
 
   check_build_public:
     if: inputs.core_version != ''
