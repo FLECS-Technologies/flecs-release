@@ -15,11 +15,23 @@ on:
         description: target release branch
         default: main
         type: string
-      app_token:
-        required: true
-        description: App token for repos
-        type: string
 jobs:
+  generate_token:
+    runs-on: ubuntu-latest
+    outputs:
+      app_token: ${{ steps.app-token.outputs.token }}
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+          owner: FLECS-Technologies
+          repositories: |
+            flecs-webapp-dummy
+            flecs-build-dummy
+            flecs-public-dummy
   release:
     runs-on: ubuntu-latest
     steps:
