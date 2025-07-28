@@ -32,6 +32,9 @@ jobs:
             flecs-webapp-dummy
             flecs-build-dummy
             flecs-public-dummy
+      - name: Debug Token
+        run: |
+          echo "Generated token: '${{ steps.app-token.outputs.token }}'"
   release:
     needs: generate_token
     runs-on: ubuntu-latest
@@ -60,11 +63,11 @@ jobs:
               "make_latest": "false"
             }
         env:
-          GITHUB_TOKEN: ${{ needs.generate_token.outputs.app_token }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.app_token }}
 
       - name: Check release
         env:
-          GITHUB_TOKEN: ${{ needs.generate_token.outputs.app_token }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.app_token }}
           OWNER: FLECS-Technologies
           REPO: flecs-${{ inputs.name }}
           TAG: ${{ inputs.env_version }}
