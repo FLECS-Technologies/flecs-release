@@ -115,7 +115,7 @@ jobs:
 
   check_build_public:
     if: inputs.core_version != ''
-    needs: [check_build_build, release_public]
+    needs: [release_public]
     uses: ./.github/workflows/check_build_job.yml
     with:
       name: public-dummy
@@ -123,7 +123,7 @@ jobs:
 
   increment_version_to_next_webapp:
     if: inputs.webapp_version != ''
-    needs: [release_webapp, check_build_webapp, release_build, release_public, check_build_build, check_build_public]
+    needs: [release_webapp, check_build_webapp, release_public, check_build_public]
     uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
     with:
       tag: ${{ inputs.webapp_version }}
@@ -131,7 +131,7 @@ jobs:
 
   increment_version_to_next_public:
     if: inputs.core_version != ''
-    needs: [release_webapp, check_build_webapp, release_build, release_public, check_build_build, check_build_public]
+    needs: [release_webapp, check_build_webapp, release_public, check_build_public]
     uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
     with:
       tag: ${{ inputs.core_version }}
