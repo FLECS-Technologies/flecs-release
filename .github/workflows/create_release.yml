@@ -46,10 +46,9 @@ jobs:
 
       - name: Create release
         uses: octokit/request-action@v2.x
-        env:
-          GITHUB_TOKEN: ${{ needs.generate_token.outputs.app_token }}
         with:
           route: POST /repos/{owner}/{app}/releases
+          token: ${{ needs.generate_token.outputs.app_token }}
           owner: FLECS-Technologies
           app: flecs-${{ inputs.name }}
           data: >
