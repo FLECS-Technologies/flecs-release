@@ -33,6 +33,7 @@ jobs:
             flecs-build-dummy
             flecs-public-dummy
   release:
+    needs: generate_token
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,6 +47,7 @@ jobs:
           route: POST /repos/{owner}/{app}/releases
           owner: FLECS-Technologies
           app: flecs-${{ inputs.name }}
+          token: ${{ needs.generate_token.outputs.app_token }}
           data: >
             {
               "tag_name": "${{ inputs.env_version }}",
@@ -58,8 +60,6 @@ jobs:
               "generate_release_notes":true,
               "make_latest": "false"
             }
-        env:
-          GITHUB_TOKEN: ${{ needs.generate_token.outputs.app_token }}
 
       - name: Check release
         env:
