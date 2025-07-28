@@ -54,9 +54,7 @@ jobs:
     if: inputs.webapp_version != ''
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
-    secrets:
-      app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-      private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    secrets: inherit
     with:
       name: webapp-dummy
       env_version: ${{ inputs.webapp_version }}
@@ -111,9 +109,7 @@ jobs:
     if: inputs.core_version != ''
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
-    secrets:
-      app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-      private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+    secrets: inherit
     with:
       name: public-dummy
       env_version: ${{ inputs.core_version }}
