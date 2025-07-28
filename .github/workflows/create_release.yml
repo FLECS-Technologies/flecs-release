@@ -58,11 +58,11 @@ jobs:
               "make_latest": "false"
             }
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.app_token }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Check release
         env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.app_token }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           OWNER: FLECS-Technologies
           REPO: flecs-${{ inputs.name }}
           TAG: ${{ inputs.env_version }}
