@@ -15,6 +15,11 @@ on:
         description: target release branch
         default: main
         type: string
+    secrets:
+      app-id:
+        required: true
+      private-key:
+        required: true
 jobs:
   generate_token:
     runs-on: ubuntu-latest
@@ -25,8 +30,8 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-          private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
+          app-id: ${{ secrets.app-id }}
+          private-key: ${{ secrets.private-key }}
           owner: FLECS-Technologies
           repositories: |
             flecs-webapp-dummy
