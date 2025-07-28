@@ -38,7 +38,7 @@ runs:
 
           matching_job_id=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
-            | select(.name | test("^release_" + $name + " / release$"))
+            | select(.name | test("release.*" + $name + ".* / release$"))
             | .id
           ')
 
@@ -46,15 +46,16 @@ runs:
 
           job_status=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
-            | select(.name | test("^release_" + $name + " / release$"))
+            | select(.name | test("release.*" + $name + ".* / release$"))
             | .status
           ')
+
 
           echo "Job status of release_${{ inputs.name }} / release: $job_status"
 
           job_conclusion=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
             .jobs[]
-            | select(.name | test("^release_" + $name + " / release$"))
+            | select(.name | test("release.*" + $name + ".* / release$"))
             | .conclusion
           ')
 
