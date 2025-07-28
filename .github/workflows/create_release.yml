@@ -52,7 +52,6 @@ jobs:
           route: POST /repos/{owner}/{app}/releases
           owner: FLECS-Technologies
           app: flecs-${{ inputs.name }}
-          token: ${{ needs.generate_token.outputs.app_token }}
           data: >
             {
               "tag_name": "${{ inputs.env_version }}",
@@ -65,6 +64,8 @@ jobs:
               "generate_release_notes":true,
               "make_latest": "false"
             }
+        env:
+          GITHUB_TOKEN: ${{ needs.generate_token.outputs.app_token }}
 
       - name: Check release
         env:
