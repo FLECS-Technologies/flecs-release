@@ -55,7 +55,7 @@ jobs:
     needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
-      name: webapp
+      name: webapp-dummy
       env_version: ${{ inputs.webapp_version }}
       env_branch: ${{ inputs.webapp_branch }}
 
@@ -64,52 +64,52 @@ jobs:
     needs: release_webapp
     uses: ./.github/workflows/check_build_job.yml
     with:
-      name: webapp
+      name: webapp-dummy
       env_version: ${{ inputs.webapp_version }}
 
-  flecs_build_revision:
-    if: inputs.core_version != ''
-    needs: [generate_token, validate_inputs]
-    runs-on: ubuntu-latest
-    outputs:
-      build_sha: ${{ steps.extract.outputs.build_sha }}
-    steps:
-      - name: Checkout flecs-public
-        uses: actions/checkout@v4
-        with:
-          repository: FLECS-Technologies/flecs-public
-          ref: ${{ inputs.core_branch }}
+  #flecs_build_revision:
+    #if: inputs.core_version != ''
+    #needs: [generate_token, validate_inputs]
+    #runs-on: ubuntu-latest
+    #outputs:
+    #  build_sha: ${{ steps.extract.outputs.build_sha }}
+    #steps:
+    #  - name: Checkout flecs-public
+    #    uses: actions/checkout@v4
+    #    with:
+    #      repository: FLECS-Technologies/flecs-public
+    #      ref: ${{ inputs.core_branch }}
 
-      - name: Extract flecs-build submodule revision
-        id: extract
-        run: |
-          git submodule update --init
-          BUILD_SHA=$(git ls-tree HEAD flecs-build | awk '{print $3}')
-          echo "build_sha=$BUILD_SHA" >> "$GITHUB_OUTPUT"
+    #  - name: Extract flecs-build submodule revision
+    #    id: extract
+    #    run: |
+    #      git submodule update --init
+    #      BUILD_SHA=$(git ls-tree HEAD flecs-build | awk '{print $3}')
+    #      echo "build_sha=$BUILD_SHA" >> "$GITHUB_OUTPUT"
 
-  release_build:
-    if: inputs.core_version != ''
-    needs: [validate_inputs, generate_token, flecs_build_revision]
-    uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
-    with:
-      name: build
-      env_version: ${{ inputs.core_version }}
-      env_branch: ${{ needs.flecs_build_revision.outputs.build_sha }}
+  #release_build:
+  #  if: inputs.core_version != ''
+  #  needs: [validate_inputs, generate_token, flecs_build_revision]
+  #  uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
+  #  with:
+  #    name: build
+  #    env_version: ${{ inputs.core_version }}
+  #    env_branch: ${{ needs.flecs_build_revision.outputs.build_sha }}
 
-  check_build_build:
-    if: inputs.core_version != ''
-    needs: release_build
-    uses: ./.github/workflows/check_build_job.yml
-    with:
-      name: build
-      env_version: ${{ inputs.core_version }}
+  #check_build_build:
+  #  if: inputs.core_version != ''
+  #  needs: release_build
+  #  uses: ./.github/workflows/check_build_job.yml
+  #  with:
+  #    name: build
+  #    env_version: ${{ inputs.core_version }}
 
   release_public:
     if: inputs.core_version != ''
-    needs: [validate_inputs, generate_token, release_build, check_build_build]
+    needs: [validate_inputs, generate_token]
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     with:
-      name: public
+      name: public-dummy
       env_version: ${{ inputs.core_version }}
       env_branch: ${{ inputs.core_branch }}
 
@@ -118,7 +118,7 @@ jobs:
     needs: [check_build_build, release_public]
     uses: ./.github/workflows/check_build_job.yml
     with:
-      name: public
+      name: public-dummy
       env_version: ${{ inputs.core_version }}
 
   increment_version_to_next_webapp:
@@ -127,7 +127,7 @@ jobs:
     uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
     with:
       tag: ${{ inputs.webapp_version }}
-      repo: webapp
+      repo: webapp-dummy
 
   increment_version_to_next_public:
     if: inputs.core_version != ''
@@ -135,7 +135,7 @@ jobs:
     uses: FLECS-Technologies/flecs-release/.github/workflows/bump-version.yml@main
     with:
       tag: ${{ inputs.core_version }}
-      repo: public
+      repo: public-dummy
 
   delete_release_on_failure:
     if: failure()
@@ -148,22 +148,22 @@ jobs:
         if: inputs.webapp_version != ''
         uses: ./.github/actions/delete-release-on-fail
         with:
-          name: webapp
+          name: webapp-dummy
           tag: ${{ inputs.webapp_version }}
           github_token: ${{ needs.generate_token.outputs.app_token }}
 
-      - name: Delete build release
-        if: inputs.core_version != ''
-        uses: ./.github/actions/delete-release-on-fail
-        with:
-          name: build
-          tag: ${{ inputs.core_version }}
-          github_token: ${{ needs.generate_token.outputs.app_token }}
+      #- name: Delete build release
+      #  if: inputs.core_version != ''
+      #  uses: ./.github/actions/delete-release-on-fail
+      #  with:
+      #    name: build
+      #    tag: ${{ inputs.core_version }}
+      #    github_token: ${{ needs.generate_token.outputs.app_token }}
 
       - name: Delete public release
         if: inputs.core_version != ''
         uses: ./.github/actions/delete-release-on-fail
         with:
-          name: public
+          name: public-dummy
           tag: ${{ inputs.core_version }}
           github_token: ${{ needs.generate_token.outputs.app_token }}
