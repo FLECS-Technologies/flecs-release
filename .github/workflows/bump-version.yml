@@ -41,21 +41,21 @@ jobs:
           path: flecs-release
 
       - name: Bump webapp action
-        if: ${{ inputs.repo == 'webapp' }}
+        if: ${{ inputs.repo == 'webapp-dummy' }}
         uses: ./flecs-release/.github/actions/bump-webapp-to-next-version
         with:
           tag: ${{ inputs.tag }}
-          target_dir: ${{ github.workspace }}/webapp
+          target_dir: ${{ github.workspace }}/webapp-dummy
 
       - name: Commit & push version bump for webapp
-        if: ${{ inputs.repo == 'webapp' }}
+        if: ${{ inputs.repo == 'webapp-dummy' }}
         run: |
-          cd ${{ github.workspace }}/webapp
+          cd ${{ github.workspace }}/webapp-dummy
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp.git
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-webapp-dummy.git
 
           if ! git diff --quiet; then
             git add package*.json
@@ -66,14 +66,14 @@ jobs:
           fi
 
       - name: Commit & push version bump for public
-        if: ${{ inputs.repo == 'public' }}
+        if: ${{ inputs.repo == 'public-dummy' }}
         run: |
-          cd ${{ github.workspace }}/public
+          cd ${{ github.workspace }}/public-dummy
 
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
 
-          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public.git
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/FLECS-Technologies/flecs-public-dummy.git
 
           if ! git diff --quiet; then
             git add \
