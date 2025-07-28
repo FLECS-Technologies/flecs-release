@@ -43,7 +43,6 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner}/{app}/releases
-          token: ${{ steps.generate_token.outputs.app_token }}
           owner: FLECS-Technologies
           app: flecs-${{ inputs.name }}
           data: >
@@ -58,6 +57,8 @@ jobs:
               "generate_release_notes":true,
               "make_latest": "false"
             }
+        env:
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.app_token }}
 
       - name: Check release
         env:
