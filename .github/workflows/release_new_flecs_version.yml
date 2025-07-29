@@ -143,6 +143,8 @@ jobs:
         with:
           name: webapp-dummy
           tag: ${{ inputs.webapp_version }}
+          app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+          private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
 
       #- name: Delete build release
       #  if: inputs.core_version != ''
@@ -150,6 +152,8 @@ jobs:
       #  with:
       #    name: build
       #    tag: ${{ inputs.core_version }}
+      #    app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+      #    private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
 
       - name: Delete public release
         if: inputs.core_version != ''
@@ -157,3 +161,5 @@ jobs:
         with:
           name: public-dummy
           tag: ${{ inputs.core_version }}
+          app_id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
+          private_key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
