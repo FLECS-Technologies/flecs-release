@@ -32,9 +32,9 @@ jobs:
           private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY  }}
           owner: FLECS-Technologies
           repositories: |
-            flecs-webapp-dummy
-            flecs-build-dummy
-            flecs-public-dummy
+            flecs-webapp
+            flecs-build
+            flecs-public
       - name: Debug Token
         run: |
           echo "Generated token: '${{ steps.app-token.outputs.token }}'"
