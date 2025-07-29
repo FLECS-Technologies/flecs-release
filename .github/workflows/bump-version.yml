@@ -26,7 +26,7 @@ jobs:
           repositories: |
             flecs-webapp-dummy
             flecs-public-dummy
-            flecs-release-dummy
+            flecs-release
 
       - name: Checkout target repo
         uses: actions/checkout@v4
