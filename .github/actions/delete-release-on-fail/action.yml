@@ -7,6 +7,12 @@ inputs:
   tag:
     description: The release tag to delete
     required: true
+  app_id:
+    description: GitHub App ID
+    required: true
+  private_key:
+    description: GitHub App Private Key
+    required: true
 runs:
   using: composite
   steps:
@@ -14,8 +20,8 @@ runs:
       id: app-token
       uses: actions/create-github-app-token@v1
       with:
-        app-id: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_CLIENT_ID }}
-        private-key: ${{ secrets.FLECS_WORKFLOW_AUTOMATION_KEY }}
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.private_key }}
         owner: FLECS-Technologies
         repositories: |
           flecs-webapp-dummy
