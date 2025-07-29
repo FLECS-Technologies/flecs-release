@@ -131,6 +131,7 @@ jobs:
 
   delete_release_on_failure:
     if: failure()
+    needs: [validate_inputs, release_webapp, check_build_webapp, release_public, check_build_public]
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
