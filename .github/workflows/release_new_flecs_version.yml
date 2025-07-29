@@ -35,7 +35,7 @@ jobs:
 
   release_webapp:
     if: inputs.webapp_version != ''
-    needs: [validate_inputs, generate_token]
+    needs: validate_inputs
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     secrets: inherit
     with:
@@ -95,7 +95,7 @@ jobs:
 
   release_public:
     if: inputs.core_version != ''
-    needs: [validate_inputs, generate_token]
+    needs: validate_inputs
     uses: FLECS-Technologies/flecs-release/.github/workflows/create_release.yml@main
     secrets: inherit
     with:
