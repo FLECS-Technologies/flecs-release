@@ -20,6 +20,7 @@ runs:
         INTERVAL=30
         COUNTER=0
         FOUND=false
+        CLEAN_NAME=$(echo "${{ inputs.name }}" | sed 's/-dummy//')
 
         while [[ $COUNTER -lt $MAX_RETRIES ]]; do
           echo "Attempt $((COUNTER+1)) of $MAX_RETRIES"
@@ -36,7 +37,7 @@ runs:
           echo "Found jobs:"
           echo "$jobs_response" | jq -r '.jobs[].name'
 
-          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          matching_job_id=$(echo "$jobs_response" | jq -r --arg name "$CLEAN_NAME" '
             .jobs[]
             | select(.name | test("release.*" + $name + ".* / release$"))
             | .id
@@ -44,7 +45,7 @@ runs:
 
           echo "Release workflow id: $matching_job_id"
 
-          job_status=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          job_status=$(echo "$jobs_response" | jq -r --arg name "$CLEAN_NAME" '
             .jobs[]
             | select(.name | test("release.*" + $name + ".* / release$"))
             | .status
@@ -53,7 +54,7 @@ runs:
 
           echo "Job status of release_${{ inputs.name }} / release: $job_status"
 
-          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "${{ inputs.name }}" '
+          job_conclusion=$(echo "$jobs_response" | jq -r --arg name "$CLEAN_NAME" '
             .jobs[]
             | select(.name | test("release.*" + $name + ".* / release$"))
             | .conclusion
