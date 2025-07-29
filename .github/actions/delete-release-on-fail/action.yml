@@ -24,9 +24,9 @@ runs:
         private-key: ${{ inputs.private_key }}
         owner: FLECS-Technologies
         repositories: |
-          flecs-webapp-dummy
-          flecs-build-dummy
-          flecs-public-dummy
+          flecs-webapp
+          flecs-build
+          flecs-public
 
     - run: |
         set -e
