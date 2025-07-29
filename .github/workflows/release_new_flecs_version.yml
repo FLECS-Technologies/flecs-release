@@ -46,15 +46,10 @@ jobs:
   check_build_webapp:
     if: inputs.webapp_version != ''
     needs: release_webapp
-    runs-on: ubuntu-latest
-    steps:
-      - name: simulated failure
-        run: |
-          exit 1
-    #uses: ./.github/workflows/check_build_job.yml
-    #with:
-    #  name: webapp-dummy
-    #  env_version: ${{ inputs.webapp_version }}
+    uses: ./.github/workflows/check_build_job.yml
+    with:
+      name: webapp-dummy
+      env_version: ${{ inputs.webapp_version }}
 
   #flecs_build_revision:
     #if: inputs.core_version != ''
