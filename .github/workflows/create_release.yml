@@ -50,12 +50,11 @@ jobs:
               "tag_name": "${{ inputs.env_version }}",
               "target_commitish": ${{ inputs.env_branch }},
               "name":"${{ inputs.env_version }}",
-              "body":"Automated dummy release",
               "draft": false,
               "prerelease": false,
               "message": "automated tag creation",
               "generate_release_notes":true,
-              "make_latest": "false"
+              "make_latest": "true"
             }
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
